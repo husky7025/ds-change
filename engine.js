@@ -330,9 +330,197 @@ function getTeacherTimetableLocal(scheduleList, teacherName) {
   return { success: true, timetable: buildGridData(lessons) };
 }
 
+
+/* =========================================================
+   출장·연가 일괄 결보강 모드 엔진 (Multi-day Trip Batch Mode)
+   ========================================================= */
+
+/**
+ * 1. 출장 기간(시작일, 일수) 내 출장 교사의 모든 수업 목록 추출
+ */
+function getTripLessonsForDates(scheduleList, targetTeacher, dateList) {
+  const lessons = [];
+  let idCounter = 1;
+
+  dateList.forEach(function(dObj) {
+    const dayLessons = scheduleList.filter(function(s) {
+      return s.teacher === targetTeacher && s.day === dObj.day;
+    });
+
+    dayLessons.sort(function(a, b) { return a.period - b.period; });
+
+    dayLessons.forEach(function(l) {
+      const parsed = splitClassName(l.className);
+      const pureCls = l.pureClass || parsed.cls || l.className;
+      const subj = parsed.subj || l.className;
+      const cat = deduceSubjectCategory(l.className || subj);
+
+      lessons.push({
+        id: 'trip_lesson_' + (idCounter++),
+        date: dObj.date,
+        day: dObj.day,
+        shortDate: dObj.shortDate || dObj.date,
+        period: l.period,
+        className: l.className,
+        pureClass: pureCls,
+        subject: subj,
+        category: cat,
+        targetTeacher: targetTeacher
+      });
+    });
+  });
+
+  return lessons;
+}
+
+/**
+ * 2. 출장 기간 내 학급별 수업 빈도 및 교사별 전담 가능 여부(연속성) 분석
+ */
+function analyzeClassContinuity(scheduleIndex, allTeachers, tripLessons) {
+  const classStats = {};
+
+  tripLessons.forEach(function(l) {
+    if (!classStats[l.pureClass]) {
+      classStats[l.pureClass] = {
+        total: 0,
+        lessons: [],
+        teacherAvailableCounts: {}
+      };
+    }
+    classStats[l.pureClass].total++;
+    classStats[l.pureClass].lessons.push(l);
+  });
+
+  Object.keys(classStats).forEach(function(cls) {
+    const cInfo = classStats[cls];
+    allTeachers.forEach(function(tName) {
+      let freeCount = 0;
+      cInfo.lessons.forEach(function(l) {
+        if (isTeacherFree(scheduleIndex, tName, l.day, l.period)) {
+          freeCount++;
+        }
+      });
+      cInfo.teacherAvailableCounts[tName] = freeCount;
+    });
+  });
+
+  return classStats;
+}
+
+/**
+ * 3. 특정 수업에 대한 보강 후보 교사 목록 생성 (정렬 및 배지 메타데이터 포함)
+ */
+function getTripCandidatesForLesson(scheduleIndex, allTeachers, lesson, teacherSubjectMap, classStats, assignedSlots, currentAssignedCounts, currentAssignedToday, consecutiveLimit) {
+  const targetCategory = lesson.category;
+  const clsStat = classStats[lesson.pureClass] || { total: 1, teacherAvailableCounts: {} };
+  const candidates = [];
+
+  allTeachers.forEach(function(tName) {
+    if (tName === lesson.targetTeacher) return;
+
+    if (!isTeacherFree(scheduleIndex, tName, lesson.day, lesson.period)) return;
+
+    const slotKey = lesson.date + '_' + lesson.period;
+    if (assignedSlots && assignedSlots[tName] && assignedSlots[tName][slotKey]) return;
+
+    if (consecutiveLimit > 0 && checkConsecutive(scheduleIndex, tName, lesson.day, lesson.period, '', 0, consecutiveLimit)) {
+      return;
+    }
+
+    const tCategory = teacherSubjectMap[tName] || '교과';
+    const isSameSubject = (tCategory === targetCategory);
+    const classFreeCount = (clsStat.teacherAvailableCounts && clsStat.teacherAvailableCounts[tName]) || 0;
+    const isFullContinuity = (clsStat.total > 1 && classFreeCount === clsStat.total);
+    const isPartialContinuity = (clsStat.total > 1 && classFreeCount > 1);
+
+    const totalAssigned = (currentAssignedCounts && currentAssignedCounts[tName]) || 0;
+    const todayAssigned = (currentAssignedToday && currentAssignedToday[tName] && currentAssignedToday[tName][lesson.date]) || 0;
+
+    let score = 0;
+    if (isSameSubject) score += 100;
+    if (isFullContinuity) score += 60;
+    else if (isPartialContinuity) score += 30;
+
+    score -= (totalAssigned * 25);
+    if (todayAssigned === 1) score -= 40;
+    if (todayAssigned >= 2) score -= 200;
+
+    candidates.push({
+      teacher: tName,
+      category: tCategory,
+      isSameSubject: isSameSubject,
+      classFreeCount: classFreeCount,
+      classTotalLessons: clsStat.total,
+      isFullContinuity: isFullContinuity,
+      isPartialContinuity: isPartialContinuity,
+      totalAssigned: totalAssigned,
+      todayAssigned: todayAssigned,
+      score: score
+    });
+  });
+
+  candidates.sort(function(a, b) {
+    if (b.score !== a.score) return b.score - a.score;
+    return a.teacher.localeCompare(b.teacher, 'ko');
+  });
+
+  return candidates;
+}
+
+/**
+ * 4. 출장 기간 전체 수업에 대한 '스마트 원클릭 자동 배정' 알고리즘
+ */
+function autoAssignTripSubstitutes(scheduleIndex, allTeachers, tripLessons, teacherSubjectMap, consecutiveLimit) {
+  const classStats = analyzeClassContinuity(scheduleIndex, allTeachers, tripLessons);
+  const assignedSlots = {};
+  const currentAssignedCounts = {};
+  const currentAssignedToday = {};
+  const assignments = {};
+
+  const sortedLessons = tripLessons.slice().sort(function(a, b) {
+    const countA = (classStats[a.pureClass] && classStats[a.pureClass].total) || 1;
+    const countB = (classStats[b.pureClass] && classStats[b.pureClass].total) || 1;
+    if (countB !== countA) return countB - countA;
+    if (a.date !== b.date) return a.date.localeCompare(b.date);
+    return a.period - b.period;
+  });
+
+  sortedLessons.forEach(function(lesson) {
+    const cands = getTripCandidatesForLesson(
+      scheduleIndex, allTeachers, lesson, teacherSubjectMap, classStats,
+      assignedSlots, currentAssignedCounts, currentAssignedToday, consecutiveLimit || 3
+    );
+
+    if (cands.length > 0) {
+      const best = cands[0];
+      const tName = best.teacher;
+
+      assignments[lesson.id] = tName;
+
+      if (!assignedSlots[tName]) assignedSlots[tName] = {};
+      assignedSlots[tName][lesson.date + '_' + lesson.period] = true;
+
+      currentAssignedCounts[tName] = (currentAssignedCounts[tName] || 0) + 1;
+
+      if (!currentAssignedToday[tName]) currentAssignedToday[tName] = {};
+      currentAssignedToday[tName][lesson.date] = (currentAssignedToday[tName][lesson.date] || 0) + 1;
+    } else {
+      assignments[lesson.id] = '';
+    }
+  });
+
+  return {
+    success: true,
+    assignments: assignments,
+    assignedCounts: currentAssignedCounts,
+    assignedToday: currentAssignedToday,
+    classStats: classStats
+  };
+}
+
 /* Node 테스트용 export */
 if (typeof module !== "undefined" && module.exports) {
   module.exports = { deduceSubjectCategory, buildTeacherSubjectMap, parseCSV, parseSheetValues, buildScheduleIndex, isTeacherFree, checkConsecutive,
     searchScheduleLocal, findCommonFreeTimeLocal, simulateSwapLocal, simulateSubstituteLocal,
-    getTeacherTimetableLocal, extractClassName, splitClassName, buildGridData };
+    getTeacherTimetableLocal, extractClassName, splitClassName, buildGridData, getTripLessonsForDates, analyzeClassContinuity, getTripCandidatesForLesson, autoAssignTripSubstitutes };
 }
