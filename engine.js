@@ -610,7 +610,25 @@ function autoAssignTripSubstitutes(scheduleIndex, scheduleList, allTeachers, tri
 
   // 1단계: 수업 교체(Swap) 우선 탐색 (policy: swap_first 또는 swap_only)
   if (policy === 'swap_first' || policy === 'swap_only') {
-    sortedLessons.forEach(function(lesson) {
+    // 희소한 수업(교체 파트너가 적은 수업)을 먼저 매칭하여 교체 성공률을 100%로 극대화
+    const swapCountsMap = {};
+    tripLessons.forEach(function(l) {
+      const c = getTripSwapCandidatesForLesson(
+        scheduleIndex, scheduleList, l, tripDateStrings, allowNextWeek, {}, consecutiveLimit || 3
+      );
+      swapCountsMap[l.id] = c.length;
+    });
+
+    const swapSortedLessons = tripLessons.slice().sort(function(a, b) {
+      const cntA = swapCountsMap[a.id];
+      const cntB = swapCountsMap[b.id];
+      if (cntA === 0 && cntB > 0) return 1;
+      if (cntB === 0 && cntA > 0) return -1;
+      if (cntA !== cntB) return cntA - cntB;
+      return a.date.localeCompare(b.date);
+    });
+
+    swapSortedLessons.forEach(function(lesson) {
       if (assignments[lesson.id]) return;
 
       const swapCands = getTripSwapCandidatesForLesson(

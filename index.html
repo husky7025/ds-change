@@ -2424,7 +2424,25 @@ function loadTimetableOnStart() {
         });
 
         if (policy === 'swap_first' || policy === 'swap_only') {
-          sortedLessons.forEach(function(lesson) {
+          // 희소한 수업(교체 파트너가 적은 수업)을 먼저 매칭하여 교체 성공률을 100%로 극대화
+          var swapCountsMap = {};
+          tripLessons.forEach(function(l) {
+            var c = getTripSwapCandidatesForLesson(
+              scheduleIndex, scheduleList, l, tripDateStrings, allowNextWeek, {}, consecutiveLimit || 3
+            );
+            swapCountsMap[l.id] = c.length;
+          });
+
+          var swapSortedLessons = tripLessons.slice().sort(function(a, b) {
+            var cntA = swapCountsMap[a.id];
+            var cntB = swapCountsMap[b.id];
+            if (cntA === 0 && cntB > 0) return 1;
+            if (cntB === 0 && cntA > 0) return -1;
+            if (cntA !== cntB) return cntA - cntB;
+            return a.date.localeCompare(b.date);
+          });
+
+          swapSortedLessons.forEach(function(lesson) {
             if (assignments[lesson.id]) return;
             var swapCands = getTripSwapCandidatesForLesson(
               scheduleIndex, scheduleList, lesson, tripDateStrings, allowNextWeek, assignedSlots, consecutiveLimit || 3
