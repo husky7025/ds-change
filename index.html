@@ -152,6 +152,15 @@
       cursor: pointer; text-align: center; transition: all 0.15s;
     }
     .day-tab.active { background: var(--primary); border-color: var(--primary); color: white; }
+    .main-tabs { display: flex; gap: 8px; margin: 0 14px 12px; }
+    .main-tab {
+      flex: 1; padding: 10px 4px;
+      border: 1px solid var(--gray-300);
+      border-radius: var(--radius-sm);
+      background: white; font-size: 14px; font-weight: 800; color: var(--gray-600);
+      cursor: pointer; text-align: center; transition: all 0.15s;
+    }
+    .main-tab.active { background: var(--primary); border-color: var(--primary); color: white; }
 
     .period-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 4px; }
     .period-btn {
@@ -449,126 +458,7 @@
       vertical-align: middle;
     }
 
-  
-    /* ── 메인 모드 전환 탭 ── */
-    .main-mode-tabs-container {
-      max-width: 1400px;
-      margin: 10px auto 0 auto;
-      padding: 0 16px;
-    }
-    .main-mode-tabs {
-      display: flex;
-      gap: 8px;
-      border-bottom: 2px solid var(--gray-200);
-    }
-    .main-mode-tab {
-      background: none;
-      border: none;
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--gray-500);
-      padding: 10px 20px;
-      border-radius: var(--radius-md) var(--radius-md) 0 0;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      border-bottom: 3px solid transparent;
-      margin-bottom: -2px;
-    }
-    .main-mode-tab:hover {
-      color: var(--primary);
-      background: #f1f5f9;
-    }
-    .main-mode-tab.active {
-      color: var(--primary);
-      border-bottom-color: var(--primary);
-      background: white;
-      box-shadow: 0 -2px 6px rgba(0,0,0,0.03);
-    }
-    .badge-new {
-      background: #ef4444;
-      color: white;
-      font-size: 10px;
-      padding: 1px 6px;
-      border-radius: 999px;
-      font-weight: 800;
-    }
-
-    /* ── 출장 모드 전용 스타일 ── */
-    .trip-dashboard-layout {
-      max-width: 1400px;
-      margin: 16px auto;
-      padding: 0 16px;
-    }
-    .badge-purple {
-      background: #7c3aed;
-      color: white;
-      font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-weight: 700;
-      display: inline-block;
-    }
-    .badge-gold {
-      background: #f59e0b;
-      color: white;
-      font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-weight: 700;
-      display: inline-block;
-    }
-    .badge-gray {
-      background: var(--gray-200);
-      color: var(--gray-700);
-      font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-weight: 600;
-      display: inline-block;
-    }
-    .badge-danger {
-      background: #fee2e2;
-      color: #dc2626;
-      font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-weight: 700;
-      display: inline-block;
-    }
-    .trip-candidate-select {
-      width: 100%;
-      padding: 7px 10px;
-      border: 1.5px solid var(--gray-300);
-      border-radius: var(--radius-md);
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--gray-800);
-      background: white;
-      cursor: pointer;
-    }
-    .trip-candidate-select:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
-    }
-    .workload-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 12px;
-      background: white;
-      border: 1px solid var(--gray-200);
-      border-radius: var(--radius-md);
-      font-size: 12px;
-    }
-    .workload-item.heavy {
-      background: #fff1f2;
-      border-color: #fecdd3;
-    }
-</style>
+  </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
@@ -588,22 +478,17 @@
   <div id="dataBanner" class="data-banner" style="display:none;"></div>
 
   <!-- ── 3. 메인 2열 대시보드 ── -->
-    <!-- ── 메인 모드 탭 (단일 차시 vs 출장·연가 일괄) ── -->
-  <div class="main-mode-tabs-container">
-    <div class="main-mode-tabs">
-      <button class="main-mode-tab active" id="tabModeSingle" onclick="switchMainMode('single')">
-        🔍 단일 차시 탐색
-      </button>
-      <button class="main-mode-tab" id="tabModeTrip" onclick="switchMainMode('trip')">
-        ✈️ 출장·연가 패키지 모드 <span class="badge-new">NEW</span>
-      </button>
-    </div>
+  <!-- ── 메인 탭 ── -->
+  <div class="main-tabs">
+    <button class="main-tab active" id="tabBtnSingle" onclick="switchMainTab('single')">🔍 단건 탐색</button>
+    <button class="main-tab" id="tabBtnTrip" onclick="switchMainTab('trip')">🧳 출장·연가 일괄 탐색</button>
   </div>
 
   <div class="dashboard-layout">
 
     <!-- ── [좌측] 패널 ── -->
     <div class="left-panel">
+      <div id="tabSingle">
 
       <!-- 1) 1:1 결보강 탐색 카드 -->
       <div class="card">
@@ -754,11 +639,58 @@
         </button>
       </div>
 
+      </div>
+      <div id="tabTrip" style="display:none;">
+      <!-- 1-2) 출장·연가 일괄 탐색 카드 -->
+      <div class="card" style="border-top: 3px solid var(--warning);">
+        <div class="card-title" style="color: var(--warning);">
+          <span>🧳 출장·연가 일괄 탐색 (다차시)</span>
+        </div>
+
+        <div class="input-row form-group">
+          <div>
+            <label>출장 교사명</label>
+            <input type="text" id="tripTeacher" placeholder="예: 유재">
+          </div>
+          <div>
+            <label>사유</label>
+            <select id="tripReason">
+              <option value="출장으로 인한 수업교체 및 보강" selected>출장</option>
+              <option value="연가로 인한 수업교체 및 보강">연가</option>
+              <option value="병가로 인한 수업교체 및 보강">병가</option>
+              <option value="공가로 인한 수업교체 및 보강">공가</option>
+              <option value="특별휴가로 인한 수업교체 및 보강">특별휴가</option>
+              <option value="수업 교체 처리">기타</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="input-row form-group">
+          <div>
+            <label>시작일</label>
+            <input type="date" id="tripStartDate">
+          </div>
+          <div>
+            <label>종료일</label>
+            <input type="date" id="tripEndDate">
+          </div>
+        </div>
+
+        <p style="font-size:12px; color:var(--gray-600); margin:0 0 8px;">기간 내 모든 수업을 한 번에 탐색합니다. 맞교환은 복귀 후 첫 해당 요일로 잡히고, 보강은 출장 기간 내에서 찾습니다. (최대 14일)</p>
+
+        <button class="btn btn-warning btn-block" onclick="searchTrip()" style="margin-top:6px;">
+          🧳 기간 내 수업 일괄 탐색
+        </button>
+      </div>
+
+      </div>
+
     </div>
 
     <!-- ── [우측] 결과 & 확인원 패널 ── -->
     <div class="right-panel">
 
+      <div id="tabSingleRight">
       <div id="initialPlaceholder" class="placeholder-box">
         <div class="icon">🧭</div>
         <p>좌측에서 기준 교사, 날짜, 교시를 지정한 후 <b>[🔍 실시간 시간표 탐색]</b>을 누르시거나,<br>참석 교사를 입력 후 <b>[⚡ 공동 공강시간 찾아내기]</b>를 누르세요.</p>
@@ -785,6 +717,29 @@
           </thead>
           <tbody id="candidatesTbody"></tbody>
         </table>
+      </div>
+
+      </div>
+      <div id="tabTripRight" style="display:none;">
+      <!-- 출장 모드 결과 영역 -->
+      <div id="tripResultArea" style="display:none;">
+        <div class="result-summary-bar">
+          <div>
+            <div style="font-size:14px; font-weight:800; color:var(--gray-800);" id="tripSummaryText">-</div>
+            <div style="font-size:12px; color:var(--gray-600);" id="tripSummarySub">-</div>
+          </div>
+          <div id="tripProgressText" style="font-size:12px; font-weight:700; color:var(--primary);">-</div>
+        </div>
+
+        <div id="tripCartArea" class="table-box" style="display:none; margin-top:10px;">
+          <div style="font-weight:800; margin-bottom:6px;">🧺 장바구니 (확정 배정)</div>
+          <div id="tripCartList"></div>
+          <div id="tripFatigueList" style="font-size:12px; color:var(--gray-600); margin-top:6px;"></div>
+        </div>
+
+        <div id="tripLessonsArea" style="margin-top:10px;"></div>
+      </div>
+
       </div>
 
       <!-- 한눈에 보는 변경 요약 (Diff Banner) -->
@@ -829,157 +784,7 @@
 
   </div>
 
-    <!-- ── 3-B. [출장·연가 일괄 결보강 대시보드] ── -->
-  <div id="tripDashboardLayout" class="trip-dashboard-layout" style="display:none;">
-
-    <!-- 1) 출장 조건 설정 카드 -->
-    <div class="card" style="border-top: 3px solid var(--primary); margin-bottom: 16px;">
-      <div class="card-title">
-        <span>✈️ 출장·연가 일괄 결보강 탐색 설정</span>
-        <span style="font-size: 11px; color: var(--gray-500);">3일 이상 다차시 결강을 한 번에 배정합니다</span>
-      </div>
-      <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end;">
-        <div style="flex: 1; min-width: 130px;">
-          <label style="font-size: 12px; font-weight: 700; color: var(--gray-700); margin-bottom: 4px; display: block;">출장(결강) 교사</label>
-          <input type="text" id="tripTeacher" list="teacherDatalist" placeholder="예: 유재" style="width: 100%;">
-        </div>
-        <div style="flex: 1; min-width: 140px;">
-          <label style="font-size: 12px; font-weight: 700; color: var(--gray-700); margin-bottom: 4px; display: block;">출장 시작일</label>
-          <input type="date" id="tripStartDate" style="width: 100%;">
-        </div>
-        <div style="width: 110px;">
-          <label style="font-size: 12px; font-weight: 700; color: var(--gray-700); margin-bottom: 4px; display: block;">출장 일수</label>
-          <select id="tripDays" style="width: 100%;">
-            <option value="1">1일간</option>
-            <option value="2">2일간</option>
-            <option value="3" selected>3일간</option>
-            <option value="4">4일간</option>
-            <option value="5">5일간</option>
-          </select>
-        </div>
-        <div style="flex: 1; min-width: 140px;">
-          <label style="font-size: 12px; font-weight: 700; color: var(--gray-700); margin-bottom: 4px; display: block;">결강 사유</label>
-          <select id="tripReason" style="width: 100%;">
-            <option value="출장으로 인한 수업교체 및 보강" selected>출장</option>
-            <option value="연가로 인한 수업교체 및 보강">연가</option>
-            <option value="병가로 인한 수업교체 및 보강">병가</option>
-            <option value="공가로 인한 수업교체 및 보강">공가</option>
-            <option value="특별휴가로 인한 수업교체 및 보강">특별휴가</option>
-            <option value="수업 교체 및 보강 처리">기타</option>
-          </select>
-        </div>
-        <div style="width: 110px;">
-          <label style="font-size: 12px; font-weight: 700; color: var(--gray-700); margin-bottom: 4px; display: block;">연속수업 제한</label>
-          <select id="tripConsecutiveLimit" style="width: 100%;">
-            <option value="0">제한 없음</option>
-            <option value="2">2연속 제외</option>
-            <option value="3" selected>3연속 제외</option>
-            <option value="4">4연속 제외</option>
-          </select>
-        </div>
-        <div style="flex: 1; min-width: 190px;">
-          <label style="font-size: 12px; font-weight: 700; color: var(--gray-700); margin-bottom: 4px; display: block;">배정 정책 (1순위 교체 권장)</label>
-          <select id="tripPolicy" style="width: 100%;">
-            <option value="swap_first" selected>🔄 1순위 수업교체 우선 (교체 불가 시 보강)</option>
-            <option value="swap_only">🔄 수업교체만 탐색 (All 교체)</option>
-            <option value="sub_only">📋 보강만 탐색 (All 보강)</option>
-          </select>
-        </div>
-        <div style="display: flex; align-items: center; padding-bottom: 8px;">
-          <label style="font-size: 12px; font-weight: 600; color: var(--gray-700); cursor: pointer; display: flex; align-items: center; gap: 4px; user-select: none;">
-            <input type="checkbox" id="tripAllowNextWeek" checked style="cursor: pointer; width: 15px; height: 15px;">
-            <span>다음 주 교체 허용</span>
-          </label>
-        </div>
-        <div>
-          <button class="btn btn-primary" onclick="loadTripLessons()" style="height: 38px; padding: 0 18px;">
-            🔍 출장 수업 불러오기
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- 2) 결과 영역: 수업 목록 및 자동 배정 -->
-    <div id="tripResultArea" style="display:none;">
-      <!-- 액션 & 통계 요약 바 -->
-      <div style="background: white; border-radius: var(--radius-lg); border: 1px solid var(--gray-200); padding: 14px 18px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: var(--shadow-sm);">
-        <div>
-          <div style="font-size: 12px; color: var(--gray-500); font-weight: 600;" id="tripSummaryPeriod">-</div>
-          <div style="font-size: 16px; font-weight: 800; color: var(--gray-800); display: flex; align-items: center; gap: 8px;">
-            <span id="tripSummaryTitle">-</span>
-            <span class="badge" id="tripProgressBadge" style="background: #e0e7ff; color: #4338ca; font-size: 12px;">0 / 0 배정 완료</span>
-          </div>
-        </div>
-        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <button class="btn btn-purple" onclick="runTripAutoAssign()" title="동일교과, 학급 전담, 부하 분산을 종합 계산하여 자동 배정합니다">
-            ⚡ 원클릭 최적 자동 배정
-          </button>
-          <button class="btn btn-white" onclick="resetTripAssignments()">
-            🔄 배정 초기화
-          </button>
-          <button class="btn btn-success" id="btnDownloadTripHwpx" onclick="downloadTripHwpx()">
-            📄 출장 결보강 계획서 다운로드 (HWPX)
-          </button>
-        </div>
-      </div>
-
-      <!-- 2열 레이아웃: 좌측 수업별 배정 테이블 / 우측 부하 분산 현황판 -->
-      <div style="display: grid; grid-template-columns: 2.2fr 1fr; gap: 16px;">
-        <!-- 좌측: 차시별 배정 카드/테이블 -->
-        <div class="table-box" style="padding: 0;">
-          <table class="compact-table" id="tripLessonsTable">
-            <thead>
-              <tr>
-                <th style="width: 140px;">일시 / 교시</th>
-                <th style="width: 130px;">학급 및 과목</th>
-                <th>수업 교체 / 보강 배정</th>
-                <th style="width: 190px;">배정 상태 및 요약</th>
-              </tr>
-            </thead>
-            <tbody id="tripLessonsTbody"></tbody>
-          </table>
-        </div>
-
-        <!-- 우측: 부하 분산 & 통계 패널 -->
-        <div>
-          <div class="card" style="border-top: 3px solid var(--purple); margin-bottom: 14px;">
-            <div class="card-title" style="color: var(--purple);">
-              <span>📊 교사별 보강 배정 부하 현황</span>
-            </div>
-            <p style="font-size: 11px; color: var(--gray-500); margin-bottom: 10px;">
-              특정 교사에게 보강이 편중되지 않도록 분산 상태를 실시간 확인합니다.
-            </p>
-            <div id="tripWorkloadStats" style="display: flex; flex-direction: column; gap: 6px; max-height: 400px; overflow-y: auto;">
-              <div style="font-size: 12px; color: var(--gray-400); text-align: center; padding: 20px;">
-                수업을 불러온 후 보강을 배정하면 현황이 표시됩니다.
-              </div>
-            </div>
-          </div>
-
-          <div class="card" style="background: #f8fafc; border: 1px dashed var(--gray-300);">
-            <div style="font-size: 12px; font-weight: 700; color: var(--gray-700); margin-bottom: 6px;">
-              💡 출장 모드 스마트 배정 원칙
-            </div>
-            <ul style="font-size: 11px; color: var(--gray-600); line-height: 1.6; margin: 0; padding-left: 16px;">
-              <li><b>★동일교과 우선:</b> 진도 손실 방지를 위해 동일 교과 교사 우선 배치</li>
-              <li><b>👑같은 반 전담 우선:</b> 한 학급에 3일간 동일 교사가 들어가도록 묶음 배정</li>
-              <li><b>부하 균등 분산:</b> 이미 배정된 교사는 감점하여 전체 교사에게 고루 배정</li>
-              <li><b>과부하 방지:</b> 1일 2건 이상 배정 방지 및 충돌 차단</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 초기 안내 Placeholder -->
-    <div id="tripInitialPlaceholder" class="placeholder-box" style="margin-top: 20px;">
-      <div class="icon">✈️</div>
-      <p>상단에서 <b>출장 교사, 시작일, 기간(예: 3일)</b>을 선택하고<br><b>[🔍 출장 수업 불러오기]</b>를 클릭하세요.<br>기간 내 모든 수업을 한 화면에서 원클릭으로 자동 배정하고 HWPX 대장으로 출력합니다.</p>
-    </div>
-
-  </div>
-
-<!-- ── 4. 내 시간표 팝업 모달 ── -->
+  <!-- ── 4. 내 시간표 팝업 모달 ── -->
   <div class="modal-overlay" id="teacherModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -1013,7 +818,7 @@
     </div>
   </div>
 
-  <script src="engine.js?v=20261026_v1"></script>
+  <script src="engine.js?v=20261026_trip1"></script>
   <script>
 /* ═══════════════════════════════════════════════════════════════
    데이터 레이어 (GitHub 정적 버전 v1.2)
@@ -1110,9 +915,6 @@ function loadTimetableOnStart() {
       var dateStr = yyyy + '-' + mm + '-' + dd;
 
       document.getElementById('targetDate').value = dateStr;
-      if (document.getElementById('tripStartDate')) {
-        document.getElementById('tripStartDate').value = dateStr;
-      }
       onDateChanged(dateStr);
       loadTimetableOnStart();
     };
@@ -1908,24 +1710,6 @@ function loadTimetableOnStart() {
         return s;
       }
 
-      var dataRows = (p.items && p.items.length > 0) ? p.items : [{
-        shortDateA: p.shortDateA,
-        cls: p.cls,
-        periodA: p.periodA,
-        subjectA: p.subjectA,
-        teacherA: p.teacherA,
-        typeLabel: p.typeLabel,
-        isSwap: p.isSwap,
-        shortDateB: p.shortDateB,
-        clsB: p.clsB || p.cls,
-        periodB: p.periodB,
-        subjectB: p.subjectB,
-        teacherB: p.teacherB
-      }];
-
-      var totalDataRows = Math.max(7, dataRows.length);
-      var totalRowCnt = 4 + totalDataRows + 1; // 4 헤더행 + 데이터행 + 1 비고행
-
       var xml = '<?xml version="1.0" encoding="utf-8"?>\n' +
         '<hs:sec xmlns:ha="http://www.hancom.co.kr/hwpml/2011/app" xmlns:hp="http://www.hancom.co.kr/hwpml/2011/paragraph" xmlns:hp10="http://www.hancom.co.kr/hwpml/2016/paragraph" xmlns:hs="http://www.hancom.co.kr/hwpml/2011/section" xmlns:hc="http://www.hancom.co.kr/hwpml/2011/core" xmlns:hh="http://www.hancom.co.kr/hwpml/2011/head">\n' +
         '  <hp:p id="0" paraPrIDRef="15" styleIDRef="8" pageBreak="0" columnBreak="0" merged="0">\n' +
@@ -1933,132 +1717,128 @@ function loadTimetableOnStart() {
         '      <hp:secPr id="" textDirection="HORIZONTAL" spaceColumns="1134" tabStop="8000" tabStopVal="4000" tabStopUnit="HWPUNIT" outlineShapeIDRef="0" memoShapeIDRef="0" textVerticalWidthHead="0" masterPageCnt="0">\n' +
         '        <hp:grid lineGrid="0" charGrid="0" wonggojiFormat="0" />\n' +
         '        <hp:startNum pageStartsOn="BOTH" page="0" pic="0" tbl="0" equation="0" />\n' +
-        '        <hp:visibility hideHeader="0" hideFooter="0" hideMasterPage="0" border="SHOW_ALL" fill="SHOW_ALL" hidePageNum="0" />\n' +
-        '        <hp:lineNumber restartType="NEW_PAGE" countBy="1" distance="1134" startNumber="1" />\n' +
-        '        <hp:pagePr width="59528" height="84188" autoSpaceEAsianEng="0" autoSpaceEAsianNum="0">\n' +
-        '          <hp:margin left="4252" right="4252" top="2834" bottom="2834" header="0" footer="0" gutter="0" />\n' +
+        '        <hp:visibility hideFirstHeader="0" hideFirstFooter="0" hideFirstMasterPage="0" border="SHOW_ALL" fill="SHOW_ALL" hideFirstPageNum="0" hideFirstEmptyLine="0" showLineNumber="0" />\n' +
+        '        <hp:pagePr landscape="WIDELY" width="59528" height="84188" gutterType="LEFT_ONLY">\n' +
+        '          <hp:margin header="2836" footer="2836" gutter="0" left="4252" right="4252" top="2836" bottom="2836" />\n' +
         '        </hp:pagePr>\n' +
         '      </hp:secPr>\n' +
         '    </hp:run>\n' +
         '  </hp:p>\n';
 
-      // 1. 제목
-      xml += '  <hp:p id="1" paraPrIDRef="2" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0">\n';
-      xml += '    <hp:run charPrIDRef="1"><hp:t>수업(교체ㆍ보강) 계획서</hp:t></hp:run>\n';
-      xml += '  </hp:p>\n';
-
-      xml += '  <hp:p id="2" paraPrIDRef="0" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0">\n';
+      // 1. 결재란 표 (교무부장, 교감)
+      xml += '  <hp:p id="1" paraPrIDRef="14" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0">\n';
       xml += '    <hp:run charPrIDRef="0">\n';
       xml += '      <hp:tbl id="101" zOrder="0" numberingType="TABLE" textWrap="TOP_AND_BOTTOM" textFlow="BOTH_SIDES" lock="0" dropcapstyle="None" pageBreak="CELL" repeatHeader="0" rowCnt="2" colCnt="3" cellSpacing="0" borderFillIDRef="2" noAdjust="0">\n';
-      xml += '        <hp:sz width="12132" widthRelTo="ABSOLUTE" height="4970" heightRelTo="ABSOLUTE" protect="0" />\n';
+      xml += '        <hp:sz width="12132" widthRelTo="ABSOLUTE" height="5668" heightRelTo="ABSOLUTE" protect="0" />\n';
       xml += '        <hp:pos treatAsChar="1" affectLSpacing="0" flowWithText="1" allowOverlap="0" holdAnchorAndSO="0" vertRelTo="PARA" horzRelTo="COLUMN" vertAlign="TOP" horzAlign="RIGHT" vertOffset="0" horzOffset="0" />\n';
       xml += '        <hp:tr>\n';
-      xml += makeHwpxCell(0, 0, 1, 1, 4044, '교무', true);
-      xml += makeHwpxCell(1, 0, 1, 1, 4044, '교감', true);
-      xml += makeHwpxCell(2, 0, 1, 1, 4044, '교장', true);
+      xml += '          <hp:tc borderFillIDRef="2" hasMargin="0"><hp:cellAddr colAddr="0" rowAddr="0" /><hp:cellSpan colSpan="1" rowSpan="2" /><hp:cellSz width="2835" height="5668" /><hp:subList id="" textDirection="HORIZONTAL" lineWrap="BREAK" vertAlign="CENTER"><hp:p id="0" paraPrIDRef="13" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0"><hp:run charPrIDRef="13"><hp:t>결재</hp:t></hp:run></hp:p></hp:subList></hp:tc>\n';
+      xml += '          <hp:tc borderFillIDRef="2" hasMargin="0"><hp:cellAddr colAddr="1" rowAddr="0" /><hp:cellSpan colSpan="1" rowSpan="1" /><hp:cellSz width="4648" height="1700" /><hp:subList id="" textDirection="HORIZONTAL" lineWrap="BREAK" vertAlign="CENTER"><hp:p id="0" paraPrIDRef="13" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0"><hp:run charPrIDRef="13"><hp:t>교무부장</hp:t></hp:run></hp:p></hp:subList></hp:tc>\n';
+      xml += '          <hp:tc borderFillIDRef="2" hasMargin="0"><hp:cellAddr colAddr="2" rowAddr="0" /><hp:cellSpan colSpan="1" rowSpan="1" /><hp:cellSz width="4649" height="1700" /><hp:subList id="" textDirection="HORIZONTAL" lineWrap="BREAK" vertAlign="CENTER"><hp:p id="0" paraPrIDRef="13" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0"><hp:run charPrIDRef="13"><hp:t>교 감</hp:t></hp:run></hp:p></hp:subList></hp:tc>\n';
       xml += '        </hp:tr>\n';
       xml += '        <hp:tr>\n';
-      xml += makeHwpxCell(0, 1, 1, 1, 4044, '', false);
-      xml += makeHwpxCell(1, 1, 1, 1, 4044, '', false);
-      xml += makeHwpxCell(2, 1, 1, 1, 4044, '', false);
+      xml += '          <hp:tc borderFillIDRef="2" hasMargin="0"><hp:cellAddr colAddr="1" rowAddr="1" /><hp:cellSpan colSpan="1" rowSpan="1" /><hp:cellSz width="4648" height="3968" /><hp:subList id="" textDirection="HORIZONTAL" lineWrap="BREAK" vertAlign="CENTER"><hp:p id="0" paraPrIDRef="13" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0"><hp:run charPrIDRef="12"><hp:t></hp:t></hp:run></hp:p></hp:subList></hp:tc>\n';
+      xml += '          <hp:tc borderFillIDRef="2" hasMargin="0"><hp:cellAddr colAddr="2" rowAddr="1" /><hp:cellSpan colSpan="1" rowSpan="1" /><hp:cellSz width="4649" height="3968" /><hp:subList id="" textDirection="HORIZONTAL" lineWrap="BREAK" vertAlign="CENTER"><hp:p id="0" paraPrIDRef="13" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0"><hp:run charPrIDRef="12"><hp:t></hp:t></hp:run></hp:p></hp:subList></hp:tc>\n';
       xml += '        </hp:tr>\n';
       xml += '      </hp:tbl>\n';
       xml += '    </hp:run>\n';
       xml += '  </hp:p>\n';
 
-      // 2. 본문 대장 표
-      xml += '  <hp:p id="3" paraPrIDRef="15" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0">\n';
+      // 2. 제목
+      xml += '  <hp:p id="2" paraPrIDRef="13" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0">\n';
+      xml += '    <hp:run charPrIDRef="14"><hp:t>수  업 ( 교체ㆍ보강 )  계  획  서</hp:t></hp:run>\n';
+      xml += '  </hp:p>\n';
+      xml += '  <hp:p id="3" paraPrIDRef="13" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0"><hp:run charPrIDRef="12"><hp:t></hp:t></hp:run></hp:p>\n';
+
+      // 3. 메인 표
+      xml += '  <hp:p id="4" paraPrIDRef="13" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0">\n';
       xml += '    <hp:run charPrIDRef="0">\n';
-      xml += '      <hp:tbl id="102" zOrder="0" numberingType="TABLE" textWrap="TOP_AND_BOTTOM" textFlow="BOTH_SIDES" lock="0" dropcapstyle="None" pageBreak="CELL" repeatHeader="1" rowCnt="' + totalRowCnt + '" colCnt="19" cellSpacing="0" borderFillIDRef="2" noAdjust="0">\n';
+      xml += '      <hp:tbl id="102" zOrder="0" numberingType="TABLE" textWrap="TOP_AND_BOTTOM" textFlow="BOTH_SIDES" lock="0" dropcapstyle="None" pageBreak="CELL" repeatHeader="1" rowCnt="12" colCnt="19" cellSpacing="0" borderFillIDRef="2" noAdjust="0">\n';
       xml += '        <hp:sz width="50880" widthRelTo="ABSOLUTE" height="35000" heightRelTo="ABSOLUTE" protect="0" />\n';
       xml += '        <hp:pos treatAsChar="1" affectLSpacing="0" flowWithText="1" allowOverlap="0" holdAnchorAndSO="0" vertRelTo="PARA" horzRelTo="COLUMN" vertAlign="TOP" horzAlign="CENTER" vertOffset="0" horzOffset="0" />\n';
 
-      // 1행: 교과 / 과목 / 담당교사
+      // 1행
       xml += '        <hp:tr>\n';
       xml += makeHwpxCell(0, 0, 2, 1, sumW(0, 2), '교 과', true);
-      xml += makeHwpxCell(2, 0, 4, 1, sumW(2, 4), p.category || '', false);
+      xml += makeHwpxCell(2, 0, 4, 1, sumW(2, 4), p.category, false);
       xml += makeHwpxCell(6, 0, 3, 1, sumW(6, 3), '과 목', true);
-      xml += makeHwpxCell(9, 0, 4, 1, sumW(9, 4), p.subjectA || '', false);
+      xml += makeHwpxCell(9, 0, 4, 1, sumW(9, 4), p.subjectA, false);
       xml += makeHwpxCell(13, 0, 4, 1, sumW(13, 4), '담당 교사', true);
-      xml += makeHwpxCell(17, 0, 2, 1, sumW(17, 2), p.teacherA || '', false);
+      xml += makeHwpxCell(17, 0, 2, 1, sumW(17, 2), p.teacherA, false);
       xml += '        </hp:tr>\n';
 
-      // 2행: 결강사유 / 일시
+      // 2행
       xml += '        <hp:tr>\n';
       xml += makeHwpxCell(0, 1, 3, 1, sumW(0, 3), '결강 사유', true);
-      xml += makeHwpxCell(3, 1, 8, 1, sumW(3, 8), p.reason || '', false);
+      xml += makeHwpxCell(3, 1, 8, 1, sumW(3, 8), p.reason, false);
       xml += makeHwpxCell(11, 1, 4, 1, sumW(11, 4), '일 시', true);
-      xml += makeHwpxCell(15, 1, 4, 1, sumW(15, 4), p.shortDateA || '', false);
+      xml += makeHwpxCell(15, 1, 4, 1, sumW(15, 4), p.shortDateA, false);
       xml += '        </hp:tr>\n';
 
-      // 3행: 대분류 헤더
+      // 3행
       xml += '        <hp:tr>\n';
-      xml += makeHwpxCell(0, 2, 8, 1, sumW(0, 8), '결 강 내 용', true);
-      xml += makeHwpxCell(8, 2, 2, 1, sumW(8, 2), '구 분', true);
-      xml += makeHwpxCell(10, 2, 9, 1, sumW(10, 9), '보 강 및 교 체 내 용', true);
+      xml += makeHwpxCell(0, 2, 8, 1, sumW(0, 8), '변경 전', true);
+      xml += makeHwpxCell(8, 2, 2, 2, sumW(8, 2), '구분', true);
+      xml += makeHwpxCell(10, 2, 9, 1, sumW(10, 9), '변경 후', true);
       xml += '        </hp:tr>\n';
 
-      // 4행: 세부 헤더
+      // 4행
       xml += '        <hp:tr>\n';
-      xml += makeHwpxCell(0, 3, 1, 1, colWidths[0], '일시', true);
-      xml += makeHwpxCell(1, 3, 3, 1, sumW(1, 3), '학급', true);
+      xml += makeHwpxCell(0, 3, 1, 1, colWidths[0], '일자', true);
+      xml += makeHwpxCell(1, 3, 3, 1, sumW(1, 3), '학반', true);
       xml += makeHwpxCell(4, 3, 1, 1, colWidths[4], '교시', true);
       xml += makeHwpxCell(5, 3, 2, 1, sumW(5, 2), '과목', true);
-      xml += makeHwpxCell(7, 3, 1, 1, colWidths[7], '교사', true);
-      xml += makeHwpxCell(8, 3, 2, 1, sumW(8, 2), '구분', true);
-      xml += makeHwpxCell(10, 3, 2, 1, sumW(10, 2), '일시', true);
-      xml += makeHwpxCell(12, 3, 2, 1, sumW(12, 2), '학급', true);
+      xml += makeHwpxCell(7, 3, 1, 1, colWidths[7], '교사명', true);
+      xml += makeHwpxCell(10, 3, 2, 1, sumW(10, 2), '일자', true);
+      xml += makeHwpxCell(12, 3, 2, 1, sumW(12, 2), '학년반', true);
       xml += makeHwpxCell(14, 3, 2, 1, sumW(14, 2), '교시', true);
       xml += makeHwpxCell(16, 3, 2, 1, sumW(16, 2), '과목', true);
-      xml += makeHwpxCell(18, 3, 1, 1, colWidths[18], '교사', true);
+      xml += makeHwpxCell(18, 3, 1, 1, colWidths[18], '교사명', true);
       xml += '        </hp:tr>\n';
 
-      // 5행 ~ 데이터 행들
-      for (var i = 0; i < totalDataRows; i++) {
-        var r = 4 + i;
+      // 5행: 첫 데이터
+      xml += '        <hp:tr>\n';
+      xml += makeHwpxCell(0, 4, 1, 1, colWidths[0], p.shortDateA, false);
+      xml += makeHwpxCell(1, 4, 3, 1, sumW(1, 3), p.cls, false);
+      xml += makeHwpxCell(4, 4, 1, 1, colWidths[4], String(p.periodA), false);
+      xml += makeHwpxCell(5, 4, 2, 1, sumW(5, 2), p.subjectA, false);
+      xml += makeHwpxCell(7, 4, 1, 1, colWidths[7], p.teacherA, false);
+      xml += makeHwpxCell(8, 4, 2, 1, sumW(8, 2), p.typeLabel, true);
+      if (p.isSwap) {
+        xml += makeHwpxCell(10, 4, 2, 1, sumW(10, 2), p.shortDateB, false);
+        xml += makeHwpxCell(12, 4, 2, 1, sumW(12, 2), p.cls, false);
+        xml += makeHwpxCell(14, 4, 2, 1, sumW(14, 2), String(p.periodB), false);
+        xml += makeHwpxCell(16, 4, 2, 1, sumW(16, 2), p.subjectB, false);
+        xml += makeHwpxCell(18, 4, 1, 1, colWidths[18], p.teacherB, false);
+      } else {
+        xml += makeHwpxCell(10, 4, 2, 1, sumW(10, 2), p.shortDateA, false);
+        xml += makeHwpxCell(12, 4, 2, 1, sumW(12, 2), p.cls, false);
+        xml += makeHwpxCell(14, 4, 2, 1, sumW(14, 2), String(p.periodA), false);
+        xml += makeHwpxCell(16, 4, 2, 1, sumW(16, 2), p.subjectA, false);
+        xml += makeHwpxCell(18, 4, 1, 1, colWidths[18], p.teacherB, false);
+      }
+      xml += '        </hp:tr>\n';
+
+      // 6~11행: 빈 행
+      for (var r = 5; r <= 10; r++) {
         xml += '        <hp:tr>\n';
-        if (i < dataRows.length) {
-          var item = dataRows[i];
-          var itemSwap = (item.isSwap || item.typeLabel === '교체' || item.typeLabel === '수업교체');
-          xml += makeHwpxCell(0, r, 1, 1, colWidths[0], item.shortDateA || '', false);
-          xml += makeHwpxCell(1, r, 3, 1, sumW(1, 3), item.cls || '', false);
-          xml += makeHwpxCell(4, r, 1, 1, colWidths[4], item.periodA ? String(item.periodA) : '', false);
-          xml += makeHwpxCell(5, r, 2, 1, sumW(5, 2), item.subjectA || '', false);
-          xml += makeHwpxCell(7, r, 1, 1, colWidths[7], item.teacherA || p.teacherA || '', false);
-          xml += makeHwpxCell(8, r, 2, 1, sumW(8, 2), item.typeLabel || (itemSwap ? '교체' : '보강'), true);
-          if (itemSwap) {
-            xml += makeHwpxCell(10, r, 2, 1, sumW(10, 2), item.shortDateB || item.shortDateA || '', false);
-            xml += makeHwpxCell(12, r, 2, 1, sumW(12, 2), item.clsB || item.cls || '', false);
-            xml += makeHwpxCell(14, r, 2, 1, sumW(14, 2), item.periodB ? String(item.periodB) : '', false);
-            xml += makeHwpxCell(16, r, 2, 1, sumW(16, 2), item.subjectB || '', false);
-            xml += makeHwpxCell(18, r, 1, 1, colWidths[18], item.teacherB || '', false);
-          } else {
-            xml += makeHwpxCell(10, r, 2, 1, sumW(10, 2), item.shortDateB || item.shortDateA || '', false);
-            xml += makeHwpxCell(12, r, 2, 1, sumW(12, 2), item.clsB || item.cls || '', false);
-            xml += makeHwpxCell(14, r, 2, 1, sumW(14, 2), item.periodB ? String(item.periodB) : (item.periodA ? String(item.periodA) : ''), false);
-            xml += makeHwpxCell(16, r, 2, 1, sumW(16, 2), item.subjectB || item.subjectA || '', false);
-            xml += makeHwpxCell(18, r, 1, 1, colWidths[18], item.teacherB || '', false);
-          }
-        } else {
-          xml += makeHwpxCell(0, r, 1, 1, colWidths[0], '', false);
-          xml += makeHwpxCell(1, r, 3, 1, sumW(1, 3), '', false);
-          xml += makeHwpxCell(4, r, 1, 1, colWidths[4], '', false);
-          xml += makeHwpxCell(5, r, 2, 1, sumW(5, 2), '', false);
-          xml += makeHwpxCell(7, r, 1, 1, colWidths[7], '', false);
-          xml += makeHwpxCell(8, r, 2, 1, sumW(8, 2), '', false);
-          xml += makeHwpxCell(10, r, 2, 1, sumW(10, 2), '', false);
-          xml += makeHwpxCell(12, r, 2, 1, sumW(12, 2), '', false);
-          xml += makeHwpxCell(14, r, 2, 1, sumW(14, 2), '', false);
-          xml += makeHwpxCell(16, r, 2, 1, sumW(16, 2), '', false);
-          xml += makeHwpxCell(18, r, 1, 1, colWidths[18], '', false);
-        }
+        xml += makeHwpxCell(0, r, 1, 1, colWidths[0], '', false);
+        xml += makeHwpxCell(1, r, 3, 1, sumW(1, 3), '', false);
+        xml += makeHwpxCell(4, r, 1, 1, colWidths[4], '', false);
+        xml += makeHwpxCell(5, r, 2, 1, sumW(5, 2), '', false);
+        xml += makeHwpxCell(7, r, 1, 1, colWidths[7], '', false);
+        xml += makeHwpxCell(8, r, 2, 1, sumW(8, 2), '', false);
+        xml += makeHwpxCell(10, r, 2, 1, sumW(10, 2), '', false);
+        xml += makeHwpxCell(12, r, 2, 1, sumW(12, 2), '', false);
+        xml += makeHwpxCell(14, r, 2, 1, sumW(14, 2), '', false);
+        xml += makeHwpxCell(16, r, 2, 1, sumW(16, 2), '', false);
+        xml += makeHwpxCell(18, r, 1, 1, colWidths[18], '', false);
         xml += '        </hp:tr>\n';
       }
 
-      // 비고란 (마지막 행)
-      var remarkRow = 4 + totalDataRows;
+      // 12행: 비고란
       xml += '        <hp:tr>\n';
-      xml += makeHwpxCell(0, remarkRow, 19, 1, 50880, '보강 및 대체 보강시 수업자료 : 유인물, 활동지, 교과서 속 형성평가 등..', false, 'left');
+      xml += makeHwpxCell(0, 11, 19, 1, 50880, '보강 및 대체 보강시 수업자료 : 유인물, 활동지, 교과서 속 형성평가 등..', false, 'left');
       xml += '        </hp:tr>\n';
 
       xml += '      </hp:tbl>\n';
@@ -2072,32 +1852,6 @@ function loadTimetableOnStart() {
       xml += '</hs:sec>';
 
       return xml;
-    }
-
-    function downloadHwpxFromSection0(section0Xml, fileName, btn, defaultBtnText) {
-      if (typeof JSZip === 'undefined') {
-        alert("HWPX 생성 라이브러리(JSZip)를 로드하는 중입니다. 인터넷 연결을 확인하거나 잠시 후 다시 시도해 주세요.");
-        if (btn) { btn.disabled = false; btn.innerText = defaultBtnText; }
-        return;
-      }
-      var zip = new JSZip();
-      zip.loadAsync(HWPX_TEMPLATE_BASE64, { base64: true }).then(function(loadedZip) {
-        loadedZip.file("Contents/section0.xml", section0Xml);
-        return loadedZip.generateAsync({ type: "blob", mimeType: "application/hwp+zip" });
-      }).then(function(blob) {
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement("a");
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        if (btn) { btn.disabled = false; btn.innerText = defaultBtnText; }
-      }).catch(function(err) {
-        alert("HWPX 파일 생성 중 오류가 발생했습니다: " + err.message);
-        if (btn) { btn.disabled = false; btn.innerText = defaultBtnText; }
-      });
     }
 
     function downloadHwpx() {
@@ -2151,8 +1905,32 @@ function loadTimetableOnStart() {
           isSwap: isSwap
         });
 
-        var fileName = "수업(" + typeLabel + ")계획서_" + teacherA + "T_" + (d.dateA || "") + ".hwpx";
-        downloadHwpxFromSection0(section0Xml, fileName, btn, "📥 HWPX 다운로드");
+        var zip = new JSZip();
+        zip.loadAsync(HWPX_TEMPLATE_BASE64, { base64: true }).then(function(loadedZip) {
+          loadedZip.file("Contents/section0.xml", section0Xml);
+          return loadedZip.generateAsync({ type: "blob", mimeType: "application/hwp+zip" });
+        }).then(function(blob) {
+          var fileName = "수업(" + typeLabel + ")계획서_" + teacherA + "T_" + (d.dateA || "") + ".hwpx";
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement("a");
+          a.href = url;
+          a.download = fileName;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = "📥 HWPX 다운로드";
+          }
+        }).catch(function(err) {
+          alert("HWPX 파일 생성 중 오류가 발생했습니다: " + err.message);
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = "📥 HWPX 다운로드";
+          }
+        });
 
       } catch (e) {
         alert("오류 발생: " + e.message);
@@ -2163,552 +1941,265 @@ function loadTimetableOnStart() {
       }
     }
 
-  
-    /* ═══════════════════════════════════════════════════════════════════
-       출장·연가 일괄 결보강 모드 클라이언트 로직 (Trip Mode Controller)
-       [업그레이드] 1순위 수업 교체(맞교환/다음주) + 2순위 보강 자동 폴백
-    ═══════════════════════════════════════════════════════════════════ */
-    var tripState = {
-      teacher: '',
-      startDate: '',
-      days: 3,
-      reason: '출장으로 인한 수업교체 및 보강',
-      consecutiveLimit: 3,
-      policy: 'swap_first',
-      allowNextWeek: true,
-      lessons: [],
-      assignments: {}, // { [lessonId]: { type: '수업교체'|'수업보강', ... } }
-      classStats: {},
-      teacherSubjectMap: {},
-      dateList: []
-    };
+    /* ═══════════════════════════
+       출장·연가 일괄 탐색 (Trip mode UI)
+       - 장바구니: 차시별 확정 배정, 교사별 누적 횟수(피로도) 실시간 반영
+       - 계획서 보기는 기존 단건 흐름(selectSwapCandidate/selectSubCandidate) 재사용
+       ═══════════════════════════ */
+    var TRIP = { teacher: '', startDate: '', endDate: '', returnDate: '', lessons: [], classified: {}, cart: {}, blockInfo: {} };
 
-    function switchMainMode(mode) {
-      var tabSingle = document.getElementById('tabModeSingle');
-      var tabTrip = document.getElementById('tabModeTrip');
-      var layoutSingle = document.querySelector('.dashboard-layout');
-      var layoutTrip = document.getElementById('tripDashboardLayout');
+    function tripLessonKey(l) { return l.date + '|' + l.period; }
 
-      if (mode === 'single') {
-        tabSingle.classList.add('active');
-        tabTrip.classList.remove('active');
-        if (layoutSingle) layoutSingle.style.display = 'grid';
-        if (layoutTrip) layoutTrip.style.display = 'none';
-      } else {
-        tabSingle.classList.remove('active');
-        tabTrip.classList.add('active');
-        if (layoutSingle) layoutSingle.style.display = 'none';
-        if (layoutTrip) layoutTrip.style.display = 'block';
-
-        var sTeacher = document.getElementById('teacher').value.trim();
-        var sDate = document.getElementById('targetDate').value;
-        var tTeacherInput = document.getElementById('tripTeacher');
-        var tDateInput = document.getElementById('tripStartDate');
-        if (tTeacherInput && !tTeacherInput.value && sTeacher) tTeacherInput.value = sTeacher;
-        if (tDateInput && !tDateInput.value && sDate) tDateInput.value = sDate;
-      }
+    function tripCountFor(teacher) {
+      var n = 0;
+      Object.keys(TRIP.cart).forEach(function(k) {
+        if (TRIP.cart[k].teacherB === teacher) n++;
+      });
+      return n;
     }
 
-    function getSchoolDateList(startDateStr, dayCount) {
-      var list = [];
-      var cur = new Date(startDateStr + 'T00:00:00');
-      var dayMap = { 1: "월", 2: "화", 3: "수", 4: "목", 5: "금" };
-
-      while (list.length < dayCount) {
-        var dow = cur.getDay(); // 0: 일, 6: 토
-        if (dow >= 1 && dow <= 5) {
-          var yyyy = cur.getFullYear();
-          var mm = String(cur.getMonth() + 1).padStart(2, '0');
-          var dd = String(cur.getDate()).padStart(2, '0');
-          list.push({
-            date: yyyy + '-' + mm + '-' + dd,
-            day: dayMap[dow],
-            shortDate: (cur.getMonth() + 1) + '/' + cur.getDate()
-          });
-        }
-        cur.setDate(cur.getDate() + 1);
-      }
-      return list;
+    function tripFatigueLabel(teacher) {
+      var n = tripCountFor(teacher);
+      if (n === 0) return '';
+      return ' <span style="color:#b45309; font-weight:700;">(이번 출장 ' + n + '건 배정됨)</span>';
     }
 
-    function loadTripLessons() {
+    function tripStrategyBadge(strategy) {
+      if (strategy === 'swap') return '<span style="background:#dbeafe; color:#1e40af; padding:1px 6px; border-radius:4px; font-size:11px; font-weight:700;">🔄 다음 주 맞교환 가능</span>';
+      if (strategy === 'sameSub') return '<span style="background:#dcfce7; color:#166534; padding:1px 6px; border-radius:4px; font-size:11px; font-weight:700;">📋 동일교과 보강 추천</span>';
+      if (strategy === 'generalSub') return '<span style="background:#fef9c3; color:#854d0e; padding:1px 6px; border-radius:4px; font-size:11px; font-weight:700;">📋 일반 보강</span>';
+      return '<span style="background:#fee2e2; color:#991b1b; padding:1px 6px; border-radius:4px; font-size:11px; font-weight:700;">⚠️ 후보 없음</span>';
+    }
+
+    function tripShortDate(dateStr) {
+      var p = dateStr.split('-');
+      return parseInt(p[1], 10) + '.' + parseInt(p[2], 10);
+    }
+
+    function searchTrip() {
+      if (!GB.loaded) { alert('시간표가 아직 로드되지 않았습니다.'); return; }
       var teacher = document.getElementById('tripTeacher').value.trim();
       var startDate = document.getElementById('tripStartDate').value;
-      var days = parseInt(document.getElementById('tripDays').value) || 3;
-      var reason = document.getElementById('tripReason').value;
-      var consec = parseInt(document.getElementById('tripConsecutiveLimit').value) || 0;
-      var policy = document.getElementById('tripPolicy').value || 'swap_first';
-      var allowNextWeek = document.getElementById('tripAllowNextWeek').checked;
-
-      if (!teacher) { alert("출장(결강) 교사명을 입력해주세요."); return; }
-      if (!startDate) { alert("출장 시작일을 선택해주세요."); return; }
-      if (!GB.scheduleList || !GB.scheduleList.length) {
-        alert("시간표 데이터를 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
-        return;
+      var endDate = document.getElementById('tripEndDate').value;
+      if (!teacher) { alert('출장 교사명을 입력해 주세요.'); return; }
+      if (!startDate || !endDate) { alert('시작일과 종료일을 선택해 주세요.'); return; }
+      if (startDate > endDate) { alert('종료일이 시작일보다 빠릅니다.'); return; }
+      var days = Math.round((new Date(endDate + 'T00:00:00') - new Date(startDate + 'T00:00:00')) / 86400000) + 1;
+      if (days > 14) { alert('기간은 최대 14일까지 탐색할 수 있습니다.'); return; }
+      var consecutiveLimit = parseInt(document.getElementById('consecutiveLimit').value, 10) || 0;
+      var lessons = getTripLessons(GB.scheduleList, teacher, startDate, endDate);
+      if (lessons.length === 0) { alert('해당 기간에 ' + teacher + ' 선생님의 수업이 없습니다.'); return; }
+      var teacherSubjectMap = buildTeacherSubjectMap(GB.scheduleList);
+      var returnDate = tripAddDays(endDate, 1);
+      TRIP = { teacher: teacher, startDate: startDate, endDate: endDate, returnDate: returnDate, lessons: lessons, classified: {}, cart: {}, blockInfo: {} };
+      lessons.forEach(function(l) {
+        TRIP.classified[tripLessonKey(l)] = classifyTripLesson(GB.scheduleIndex, GB.scheduleList, GB.allTeachers, teacherSubjectMap, l, consecutiveLimit, returnDate);
+      });
+      for (var i = 0; i < lessons.length - 1; i++) {
+        var a = lessons[i], b = lessons[i + 1];
+        if (a.date === b.date && a.pureClass === b.pureClass && b.period === a.period + 1) {
+          var cands = findBlockCandidates(GB.scheduleIndex, GB.scheduleList, GB.allTeachers, teacherSubjectMap, teacher, a.day, a.period, b.period, a.pureClass);
+          if (cands.length > 0) TRIP.blockInfo[tripLessonKey(a)] = { secondKey: tripLessonKey(b), secondLesson: b, candidates: cands };
+        }
       }
-
-      var dateList = getSchoolDateList(startDate, days);
-      var lessons = getTripLessonsForDates(GB.scheduleList, teacher, dateList);
-
-      if (lessons.length === 0) {
-        alert("선택하신 기간(" + startDate + "부터 수업일 " + days + "일간)에 '" + teacher + "' 선생님의 정규 수업이 없습니다.");
-        return;
-      }
-
-      tripState.teacher = teacher;
-      tripState.startDate = startDate;
-      tripState.days = days;
-      tripState.dateList = dateList;
-      tripState.reason = reason;
-      tripState.consecutiveLimit = consec;
-      tripState.policy = policy;
-      tripState.allowNextWeek = allowNextWeek;
-      tripState.lessons = lessons;
-      tripState.assignments = {};
-      tripState.teacherSubjectMap = buildTeacherSubjectMap(GB.scheduleList);
-      tripState.classStats = analyzeClassContinuity(GB.scheduleIndex, GB.allTeachers, lessons);
-
-      document.getElementById('tripInitialPlaceholder').style.display = 'none';
       document.getElementById('tripResultArea').style.display = 'block';
-
-      var endDateStr = dateList[dateList.length - 1].date;
-      document.getElementById('tripSummaryPeriod').textContent =
-        "출장 기간: " + startDate + " ~ " + endDateStr + " (수업일 " + days + "일)";
-      document.getElementById('tripSummaryTitle').textContent =
-        "👤 " + teacher + " 선생님의 출장 수업 (총 " + lessons.length + "차시)";
-
-      renderTripLessons();
-      updateTripWorkloadDisplay();
+      renderTripResults();
     }
 
-    function renderTripLessons() {
-      var tbody = document.getElementById('tripLessonsTbody');
-      tbody.innerHTML = '';
-
-      var assignedSlots = {};
-      var currentCounts = {};
-      var currentToday = {};
-
-      var tripDateStrings = (tripState.dateList || []).map(function(d) { return d.date; });
-
-      var swapAssignedCount = 0;
-      var subAssignedCount = 0;
-
-      tripState.lessons.forEach(function(l) {
-        var a = tripState.assignments[l.id];
-        if (a) {
-          if (a.type === '수업교체') {
-            swapAssignedCount++;
-            var tA = l.targetTeacher;
-            var tB = a.teacherB;
-            if (!assignedSlots[tB]) assignedSlots[tB] = {};
-            if (!assignedSlots[tA]) assignedSlots[tA] = {};
-            assignedSlots[tB][l.date + '_' + l.period] = true;
-            assignedSlots[tA][a.dateB + '_' + a.periodB] = true;
-            assignedSlots[tB][a.dateB + '_' + a.periodB] = true;
-          } else {
-            subAssignedCount++;
-            var t = a.teacherB;
-            if (!assignedSlots[t]) assignedSlots[t] = {};
-            assignedSlots[t][l.date + '_' + l.period] = true;
-            currentCounts[t] = (currentCounts[t] || 0) + 1;
-            if (!currentToday[t]) currentToday[t] = {};
-            currentToday[t][l.date] = (currentToday[t][l.date] || 0) + 1;
-          }
-        }
+    function tripSortByFatigue(arr, getTeacher) {
+      return arr.slice().sort(function(a, b) {
+        var ca = tripCountFor(getTeacher(a)), cb = tripCountFor(getTeacher(b));
+        if (ca !== cb) return ca - cb;
+        return 0;
       });
+    }
 
-      tripState.lessons.forEach(function(lesson) {
-        var currentAssign = tripState.assignments[lesson.id];
+    function renderTripResults() {
+      var doneCount = Object.keys(TRIP.cart).length;
+      var total = TRIP.lessons.length;
+      document.getElementById('tripSummaryText').textContent =
+        '🧳 ' + TRIP.teacher + ' 선생님 | ' + tripShortDate(TRIP.startDate) + ' ~ ' + tripShortDate(TRIP.endDate) + ' | 총 ' + total + '차시';
+      document.getElementById('tripSummarySub').textContent =
+        '맞교환은 ' + tripShortDate(TRIP.returnDate) + ' 이후 첫 해당 요일로 잡힙니다. 후보 옆 (N건 배정됨)은 피로도 분산용 표시입니다.';
+      document.getElementById('tripProgressText').textContent = doneCount + ' / ' + total + '차시 배정됨';
 
-        // 1) 수업 맞교환(Swap) 후보 탐색
-        var swapCands = getTripSwapCandidatesForLesson(
-          GB.scheduleIndex, GB.scheduleList, lesson, tripDateStrings,
-          tripState.allowNextWeek, assignedSlots, tripState.consecutiveLimit
-        );
-
-        // 2) 보강(Substitute) 후보 탐색
-        var subCands = getTripCandidatesForLesson(
-          GB.scheduleIndex, GB.allTeachers, lesson, tripState.teacherSubjectMap,
-          tripState.classStats, assignedSlots, currentCounts, currentToday, tripState.consecutiveLimit
-        );
-
-        var tr = document.createElement('tr');
-
-        // 열 1: 일시 / 교시
-        var tdDate = document.createElement('td');
-        tdDate.style.fontWeight = '700';
-        tdDate.innerHTML = lesson.shortDate + " (" + lesson.day + ") <span style='color:var(--primary); font-size:13px;'>" + lesson.period + "교시</span>";
-        tr.appendChild(tdDate);
-
-        // 열 2: 학급 및 과목
-        var tdClass = document.createElement('td');
-        tdClass.innerHTML = "<span class='badge' style='background:#e0e7ff; color:#3730a3; font-weight:700; margin-right:4px;'>" +
-          escapeHtml(lesson.pureClass) + "</span> " + escapeHtml(lesson.subject);
-        tr.appendChild(tdClass);
-
-        // 열 3: 수업 교체 / 보강 배정 셀렉트박스
-        var tdSelect = document.createElement('td');
-        var select = document.createElement('select');
-        select.className = 'trip-candidate-select';
-        select.dataset.lessonId = lesson.id;
-
-        var optDefault = document.createElement('option');
-        optDefault.value = '';
-        optDefault.textContent = '-- 배정 선택 (교체 ' + swapCands.length + '건 / 보강 ' + subCands.length + '명) --';
-        select.appendChild(optDefault);
-
-        var isMatched = false;
-
-        // 그룹 A: 🔄 수업 맞교환 후보 (1순위 권장)
-        if (swapCands.length > 0) {
-          var grpSwap = document.createElement('optgroup');
-          grpSwap.label = '🔄 수업 맞교환 후보 (1순위 권장)';
-          swapCands.forEach(function(c) {
-            var opt = document.createElement('option');
-            // 포맷: SWAP|teacherB|dateB|dayB|periodB|subjectB|categoryB|isNextWeek|shortDateB
-            opt.value = ['SWAP', c.teacherB, c.dateB, c.dayB, c.periodB, c.subjectB, c.categoryB, c.isNextWeek ? '1' : '0', c.shortDateB].join('|');
-            var weekTag = c.isNextWeek ? '[교체/다음주] ' : '[교체] ';
-            opt.textContent = weekTag + c.teacherB + " (" + c.subjectB + ") ⇋ " + c.shortDateB + "(" + c.dayB + ") " + c.periodB + "교시 [" + lesson.pureClass + "반]";
-
-            if (currentAssign && currentAssign.type === '수업교체' &&
-                currentAssign.teacherB === c.teacherB && currentAssign.dateB === c.dateB && currentAssign.periodB === c.periodB) {
-              opt.selected = true;
-              isMatched = true;
-            }
-            grpSwap.appendChild(opt);
-          });
-          select.appendChild(grpSwap);
-        }
-
-        // 그룹 B: 📋 공강 보강 후보 (2순위)
-        if (subCands.length > 0) {
-          var grpSub = document.createElement('optgroup');
-          grpSub.label = '📋 공강 보강 후보 (2순위)';
-          subCands.forEach(function(c) {
-            var opt = document.createElement('option');
-            // 포맷: SUB|teacherB|category|isSameSubject
-            opt.value = ['SUB', c.teacher, c.category, c.isSameSubject ? '1' : '0'].join('|');
-            var tagList = [];
-            if (c.isSameSubject) tagList.push("★동일교과");
-            if (c.isFullContinuity) tagList.push("👑" + lesson.pureClass + "반 전담");
-            tagList.push("누적 " + c.totalAssigned + "건");
-            if (c.todayAssigned >= 1) tagList.push("오늘 " + c.todayAssigned + "건");
-
-            opt.textContent = "[보강] " + c.teacher + " (" + c.category + ") [" + tagList.join(' | ') + "]";
-
-            if (currentAssign && currentAssign.type === '수업보강' && currentAssign.teacherB === c.teacher) {
-              opt.selected = true;
-              isMatched = true;
-            }
-            grpSub.appendChild(opt);
-          });
-          select.appendChild(grpSub);
-        }
-
-        // 현재 배정되었으나 목록에 없는 경우(수동 유지)
-        if (currentAssign && !isMatched) {
-          var optCurr = document.createElement('option');
-          optCurr.value = 'CURRENT';
-          var currDesc = (currentAssign.type === '수업교체')
-            ? "🔄 [교체] " + currentAssign.teacherB + " (" + (currentAssign.shortDateB || currentAssign.dateB) + " " + currentAssign.periodB + "교시)"
-            : "📋 [보강] " + currentAssign.teacherB;
-          optCurr.textContent = currDesc + " (선택됨)";
-          optCurr.selected = true;
-          select.appendChild(optCurr);
-        }
-
-        select.addEventListener('change', function() {
-          onTripAssignSelectChange(lesson.id, this.value);
-        });
-
-        tdSelect.appendChild(select);
-        tr.appendChild(tdSelect);
-
-        // 열 4: 상태 배지 및 요약
-        var tdBadges = document.createElement('td');
-        if (currentAssign) {
-          if (currentAssign.type === '수업교체') {
-            var swapBadge = currentAssign.isNextWeek
-              ? "<span class='badge' style='background:#1d4ed8; color:white; font-size:10px; font-weight:700;'>🔄 교체(다음주)</span>"
-              : "<span class='badge' style='background:#2563eb; color:white; font-size:10px; font-weight:700;'>🔄 맞교환</span>";
-            var swapInfo = "<div style='font-size:11px; color:var(--gray-800); font-weight:600; margin-top:2px;'>" +
-              escapeHtml(currentAssign.teacherB) + "T ⇋ " + (currentAssign.shortDateB || currentAssign.dateB) + " " + currentAssign.periodB + "교시 (" + escapeHtml(currentAssign.subjectB || '') + ")</div>";
-            tdBadges.innerHTML = swapBadge + swapInfo;
-          } else {
-            var subBadge = "<span class='badge' style='background:#16a34a; color:white; font-size:10px; font-weight:700;'>📋 보강</span>";
-            var extraBadges = [];
-            var tCat = currentAssign.categoryB || tripState.teacherSubjectMap[currentAssign.teacherB] || '';
-            if (tCat === lesson.category) {
-              extraBadges.push("<span class='badge-purple'>★동일교과</span>");
-            }
-            var cStat = tripState.classStats[lesson.pureClass];
-            if (cStat && cStat.total > 1 && cStat.teacherAvailableCounts[currentAssign.teacherB] === cStat.total) {
-              extraBadges.push("<span class='badge-gold'>👑전담</span>");
-            }
-            var tTotal = currentCounts[currentAssign.teacherB] || 0;
-            extraBadges.push("<span class='badge-gray'>총 " + tTotal + "건</span>");
-            var tToday = (currentToday[currentAssign.teacherB] && currentToday[currentAssign.teacherB][lesson.date]) || 0;
-            if (tToday >= 2) {
-              extraBadges.push("<span class='badge-danger'>⚠️오늘 " + tToday + "건</span>");
-            }
-            tdBadges.innerHTML = subBadge + " <b style='font-size:11px;'>" + escapeHtml(currentAssign.teacherB) + "T</b> " + extraBadges.join(' ');
-          }
-        } else {
-          tdBadges.innerHTML = "<span class='badge' style='background:var(--gray-100); color:var(--gray-400); font-size:11px; border:1px dashed var(--gray-300);'>미배정</span>";
-        }
-        tr.appendChild(tdBadges);
-
-        tbody.appendChild(tr);
-      });
-
-      // 진행도 뱃지 업데이트 (교체 건수 + 보강 건수)
-      var progBadge = document.getElementById('tripProgressBadge');
-      var totalAssigned = swapAssignedCount + subAssignedCount;
-      var totalLessons = tripState.lessons.length;
-
-      var summaryText = "총 " + totalLessons + "차시 중 🔄 교체 " + swapAssignedCount + "건 + 📋 보강 " + subAssignedCount + "건 (" + totalAssigned + "/" + totalLessons + " 완료)";
-      progBadge.textContent = summaryText;
-
-      if (totalAssigned === totalLessons && totalLessons > 0) {
-        progBadge.style.background = '#dcfce7';
-        progBadge.style.color = '#15803d';
+      /* 장바구니 */
+      var cartArea = document.getElementById('tripCartArea');
+      var cartList = document.getElementById('tripCartList');
+      var fatigueList = document.getElementById('tripFatigueList');
+      if (doneCount === 0) {
+        cartArea.style.display = 'none';
       } else {
-        progBadge.style.background = '#e0e7ff';
-        progBadge.style.color = '#4338ca';
-      }
-    }
-
-    function onTripAssignSelectChange(lessonId, rawValue) {
-      if (!rawValue || rawValue === 'CURRENT') {
-        if (!rawValue) delete tripState.assignments[lessonId];
-        renderTripLessons();
-        updateTripWorkloadDisplay();
-        return;
-      }
-
-      var parts = rawValue.split('|');
-      var prefix = parts[0];
-
-      if (prefix === 'SWAP') {
-        tripState.assignments[lessonId] = {
-          type: '수업교체',
-          teacherB: parts[1],
-          dateB: parts[2],
-          dayB: parts[3],
-          periodB: parseInt(parts[4]),
-          subjectB: parts[5],
-          categoryB: parts[6],
-          isNextWeek: (parts[7] === '1'),
-          shortDateB: parts[8]
-        };
-      } else if (prefix === 'SUB') {
-        var lesson = tripState.lessons.find(function(l) { return l.id === lessonId; });
-        tripState.assignments[lessonId] = {
-          type: '수업보강',
-          teacherB: parts[1],
-          dateB: lesson ? lesson.date : '',
-          dayB: lesson ? lesson.day : '',
-          shortDateB: lesson ? lesson.shortDate : '',
-          periodB: lesson ? lesson.period : 0,
-          subjectB: lesson ? lesson.subject : '',
-          categoryB: parts[2],
-          isSameSubject: (parts[3] === '1')
-        };
+        cartArea.style.display = 'block';
+        var cartHtml = '';
+        var counts = {};
+        Object.keys(TRIP.cart).forEach(function(k) {
+          var item = TRIP.cart[k];
+          counts[item.teacherB] = (counts[item.teacherB] || 0) + 1;
+        });
+        var sortedKeys = Object.keys(TRIP.cart).sort();
+        sortedKeys.forEach(function(k) {
+          var item = TRIP.cart[k];
+          var l = item.lesson;
+          var desc = '';
+          if (item.type === 'swap') desc = '🔄 맞교환: ' + escapeHtml(item.teacherB) + ' 선생님 (' + tripShortDate(item.dateB) + '(' + item.dayB + ') ' + item.periodB + '교시)';
+          else if (item.type === 'block') desc = '🔗 블록: ' + escapeHtml(item.teacherB) + ' 선생님 (' + l.period + '~' + (l.period + 1) + '교시 연속)';
+          else desc = '📋 보강: ' + escapeHtml(item.teacherB) + ' 선생님';
+          cartHtml += '<div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid #f1f5f9;">' +
+            '<span style="font-size:13px;">' + tripShortDate(l.date) + '(' + l.day + ') ' + l.period + '교시 [' + escapeHtml(l.className) + '] — ' + desc + '</span>' +
+            '<span><button class="btn btn-sm btn-primary" onclick="tripLoadToPlan(\'' + k + '\')">계획서 보기</button> ' +
+            '<button class="btn btn-sm" onclick="tripUnpick(\'' + k + '\')">해제</button></span></div>';
+        });
+        cartList.innerHTML = cartHtml;
+        var fatigueHtml = Object.keys(counts).sort(function(a, b) { return counts[b] - counts[a]; }).map(function(t) {
+          var warn = counts[t] >= 3 ? ' <span style="color:#dc2626; font-weight:700;">⚠️ 과부하 주의</span>' : '';
+          return escapeHtml(t) + ' ' + counts[t] + '건' + warn;
+        }).join(' · ');
+        fatigueList.innerHTML = '교사별 누적: ' + fatigueHtml;
       }
 
-      renderTripLessons();
-      updateTripWorkloadDisplay();
-    }
-
-    function runTripAutoAssign() {
-      if (!tripState.lessons || !tripState.lessons.length) return;
-
-      var policy = document.getElementById('tripPolicy').value || 'swap_first';
-      var allowNextWeek = document.getElementById('tripAllowNextWeek').checked;
-      tripState.policy = policy;
-      tripState.allowNextWeek = allowNextWeek;
-
-      var res = autoAssignTripSubstitutes(
-        GB.scheduleIndex, GB.scheduleList, GB.allTeachers, tripState.lessons,
-        tripState.teacherSubjectMap, tripState.consecutiveLimit, policy, allowNextWeek
-      );
-
-      tripState.assignments = res.assignments;
-      renderTripLessons();
-      updateTripWorkloadDisplay();
-
-      var swapCnt = 0;
-      var subCnt = 0;
-      Object.values(res.assignments).forEach(function(a) {
-        if (a) {
-          if (a.type === '수업교체') swapCnt++;
-          else if (a.type === '수업보강') subCnt++;
-        }
-      });
-
-      var total = tripState.lessons.length;
-      var msg = "⚡ 최적 자동 배정 완료!\n" +
-        "• 총 수업: " + total + "차시\n" +
-        "• 🔄 수업 맞교환: " + swapCnt + "건 (1순위 최우선 매칭)\n" +
-        "• 📋 공강 보강: " + subCnt + "건 (동일교과/전담/부하분산)";
-      alert(msg);
-    }
-
-    function resetTripAssignments() {
-      if (!confirm("모든 수업의 교체 및 보강 배정을 초기화하시겠습니까?")) return;
-      tripState.assignments = {};
-      renderTripLessons();
-      updateTripWorkloadDisplay();
-    }
-
-    function updateTripWorkloadDisplay() {
-      var container = document.getElementById('tripWorkloadStats');
-      if (!container) return;
-
-      var teacherStats = {};
-
-      tripState.lessons.forEach(function(l) {
-        var a = tripState.assignments[l.id];
-        if (a && a.teacherB) {
-          var t = a.teacherB;
-          if (!teacherStats[t]) {
-            teacherStats[t] = { swap: 0, sub: 0, classes: [] };
-          }
-          if (a.type === '수업교체') teacherStats[t].swap++;
-          else teacherStats[t].sub++;
-
-          if (teacherStats[t].classes.indexOf(l.pureClass) === -1) {
-            teacherStats[t].classes.push(l.pureClass);
-          }
-        }
-      });
-
-      var teacherNames = Object.keys(teacherStats);
-      if (teacherNames.length === 0) {
-        container.innerHTML = "<div style='font-size:12px; color:var(--gray-400); text-align:center; padding:20px;'>교체나 보강을 배정하면 현황이 표시됩니다.</div>";
-        return;
-      }
-
-      teacherNames.sort(function(a, b) {
-        var totalA = teacherStats[a].swap + teacherStats[a].sub;
-        var totalB = teacherStats[b].swap + teacherStats[b].sub;
-        return totalB - totalA;
-      });
-
+      /* 차시 카드 */
+      var area = document.getElementById('tripLessonsArea');
       var html = '';
-      teacherNames.forEach(function(t) {
-        var stat = teacherStats[t];
-        var total = stat.swap + stat.sub;
-        var cat = tripState.teacherSubjectMap[t] || '교과';
-        var isHeavy = (stat.sub >= 3 || total >= 4);
-        var clsStr = stat.classes.join(', ');
-
-        var badges = [];
-        if (stat.swap > 0) badges.push("<span class='badge' style='background:#2563eb; color:white; font-size:10px;'>교체 " + stat.swap + "건</span>");
-        if (stat.sub > 0) badges.push("<span class='badge " + (isHeavy ? "badge-danger" : "badge-purple") + "'>보강 " + stat.sub + "건</span>");
-
-        html += "<div class='workload-item" + (isHeavy ? " heavy" : "") + "'>" +
-          "<div>" +
-            "<b>" + escapeHtml(t) + " 선생님</b> <span style='font-size:11px; color:var(--gray-500);'>(" + escapeHtml(cat) + ")</span><br>" +
-            "<span style='font-size:10px; color:var(--gray-500);'>학급: " + escapeHtml(clsStr) + "</span>" +
-          "</div>" +
-          "<div style='display:flex; gap:4px;'>" +
-            badges.join('') +
-          "</div>" +
-        "</div>";
+      TRIP.lessons.forEach(function(l) {
+        var key = tripLessonKey(l);
+        var c = TRIP.classified[key];
+        var cartItem = TRIP.cart[key];
+        var block = TRIP.blockInfo[key];
+        html += '<div style="border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:8px; background:#fff;">';
+        html += '<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">' +
+          '<span style="font-weight:800; font-size:14px;">' + tripShortDate(l.date) + '(' + l.day + ') ' + l.period + '교시 [' + escapeHtml(l.className) + ']</span>' +
+          tripStrategyBadge(c.strategy) + '</div>';
+        if (cartItem) {
+          var cartDesc = cartItem.type === 'swap' ? '🔄 맞교환: ' + escapeHtml(cartItem.teacherB) + ' 선생님 (' + tripShortDate(cartItem.dateB) + '(' + cartItem.dayB + ') ' + cartItem.periodB + '교시)'
+            : cartItem.type === 'block' ? '🔗 블록: ' + escapeHtml(cartItem.teacherB) + ' 선생님 (연속 2교시)'
+            : '📋 보강: ' + escapeHtml(cartItem.teacherB) + ' 선생님';
+          html += '<div style="margin-top:6px; font-size:13px; color:#166534; font-weight:700;">✅ 확정 — ' + cartDesc +
+            ' <button class="btn btn-sm btn-primary" onclick="tripLoadToPlan(\'' + key + '\')">계획서 보기</button>' +
+            ' <button class="btn btn-sm" onclick="tripUnpick(\'' + key + '\')">해제</button></div>';
+        } else {
+          /* 맞교환 후보 (피로도순, 상위 3) */
+          if (c.swaps.length > 0) {
+            html += '<div style="margin-top:8px; font-size:12px; font-weight:700; color:#1e40af;">🔄 맞교환 후보 (복귀 후)</div>';
+            tripSortByFatigue(c.swaps, function(s) { return s.teacherB; }).slice(0, 3).forEach(function(s) {
+              var origIdx = c.swaps.indexOf(s);
+              html += '<div style="display:flex; justify-content:space-between; align-items:center; padding:3px 0; font-size:13px;">' +
+                '<span>' + escapeHtml(s.teacherB) + ' 선생님 — ' + tripShortDate(s.dateB) + '(' + s.dayB + ') ' + s.periodB + '교시 [' + escapeHtml(s.classNameB) + ']' + tripFatigueLabel(s.teacherB) + '</span>' +
+                '<button class="btn btn-sm btn-primary" onclick="tripPickSwap(\'' + key + '\', ' + origIdx + ')">선택</button></div>';
+            });
+          }
+          /* 보강 후보 (피로도순, 상위 5) */
+          if (c.subs.length > 0) {
+            html += '<div style="margin-top:6px; font-size:12px; font-weight:700; color:#166534;">📋 보강 후보</div>';
+            tripSortByFatigue(c.subs, function(s) { return s.teacher; }).slice(0, 5).forEach(function(s) {
+              var origIdx = c.subs.indexOf(s);
+              var sameTag = s.isSameSubject ? ' <span style="color:#166534; font-weight:700;">(동일교과)</span>' : '';
+              html += '<div style="display:flex; justify-content:space-between; align-items:center; padding:3px 0; font-size:13px;">' +
+                '<span>' + escapeHtml(s.teacher) + ' 선생님 (' + escapeHtml(s.category) + ')' + sameTag + tripFatigueLabel(s.teacher) + '</span>' +
+                '<button class="btn btn-sm btn-success" onclick="tripPickSub(\'' + key + '\', ' + origIdx + ')">선택</button></div>';
+            });
+          }
+          if (c.swaps.length === 0 && c.subs.length === 0) {
+            html += '<div style="margin-top:6px; font-size:13px; color:#991b1b;">후보가 없습니다. 수동으로 조정해 주세요.</div>';
+          }
+          /* 블록 묶기 */
+          if (block && block.candidates.length > 0) {
+            html += '<div style="margin-top:8px; padding-top:6px; border-top:1px dashed #e2e8f0;">' +
+              '<div style="font-size:12px; font-weight:700; color:#7c3aed;">🔗 2연속 묶기 (' + l.period + '~' + (l.period + 1) + '교시 한 명이 연속 담당)</div>';
+            tripSortByFatigue(block.candidates, function(s) { return s.teacher; }).slice(0, 3).forEach(function(s) {
+              var origIdx = block.candidates.indexOf(s);
+              var classTag = s.teachesClass ? ' <span style="color:#7c3aed; font-weight:700;">(이 반 수업 담당)</span>' : '';
+              html += '<div style="display:flex; justify-content:space-between; align-items:center; padding:3px 0; font-size:13px;">' +
+                '<span>' + escapeHtml(s.teacher) + ' 선생님 (' + escapeHtml(s.category) + ')' + classTag + tripFatigueLabel(s.teacher) + '</span>' +
+                '<button class="btn btn-sm btn-purple" onclick="tripPickBlock(\'' + key + '\', ' + origIdx + ')">묶어 선택</button></div>';
+            });
+            html += '</div>';
+          }
+        }
+        html += '</div>';
       });
-
-      container.innerHTML = html;
+      area.innerHTML = html;
     }
 
-    function downloadTripHwpx() {
-      if (!tripState.lessons || !tripState.lessons.length) {
-        alert("먼저 출장 수업을 불러와주세요.");
-        return;
+    function tripFindLesson(key) {
+      for (var i = 0; i < TRIP.lessons.length; i++) {
+        if (tripLessonKey(TRIP.lessons[i]) === key) return TRIP.lessons[i];
       }
+      return null;
+    }
 
-      var unassigned = tripState.lessons.filter(function(l) { return !tripState.assignments[l.id]; });
-      if (unassigned.length > 0) {
-        if (!confirm("⚠️ 아직 교체나 보강이 배정되지 않은 수업이 " + unassigned.length + "건 있습니다.\n미배정된 항목을 비워둔 채 HWPX 문서를 다운로드하시겠습니까?")) {
-          return;
-        }
+    function tripPickSwap(key, idx) {
+      var c = TRIP.classified[key];
+      var s = c.swaps[idx];
+      if (!s) return;
+      TRIP.cart[key] = { type: 'swap', teacherB: s.teacherB, dayB: s.dayB, periodB: s.periodB, dateB: s.dateB, classB: s.classNameB, lesson: tripFindLesson(key) };
+      renderTripResults();
+    }
+
+    function tripPickSub(key, idx) {
+      var c = TRIP.classified[key];
+      var s = c.subs[idx];
+      if (!s) return;
+      TRIP.cart[key] = { type: 'sub', teacherB: s.teacher, lesson: tripFindLesson(key) };
+      renderTripResults();
+    }
+
+    function tripPickBlock(key, idx) {
+      var block = TRIP.blockInfo[key];
+      if (!block) return;
+      var s = block.candidates[idx];
+      if (!s) return;
+      var first = tripFindLesson(key);
+      var second = block.secondLesson;
+      TRIP.cart[key] = { type: 'block', teacherB: s.teacher, lesson: first };
+      TRIP.cart[block.secondKey] = { type: 'block', teacherB: s.teacher, lesson: second };
+      renderTripResults();
+    }
+
+    function tripUnpick(key) {
+      var item = TRIP.cart[key];
+      if (!item) return;
+      if (item.type === 'block') {
+        /* 블록 쌍은 함께 해제 */
+        Object.keys(TRIP.cart).forEach(function(k) {
+          if (TRIP.cart[k].type === 'block' && TRIP.cart[k].teacherB === item.teacherB &&
+            TRIP.cart[k].lesson.date === item.lesson.date &&
+            Math.abs(TRIP.cart[k].lesson.period - item.lesson.period) === 1) {
+            delete TRIP.cart[k];
+          }
+        });
+      } else {
+        delete TRIP.cart[key];
       }
+      renderTripResults();
+    }
 
-      var btn = document.getElementById('btnDownloadTripHwpx');
-      if (btn) {
-        btn.disabled = true;
-        btn.innerText = "⏳ HWPX 생성 중...";
+    function tripLoadToPlan(key) {
+      var item = TRIP.cart[key];
+      if (!item) return;
+      var l = item.lesson;
+      document.getElementById('reasonSelect').value = document.getElementById('tripReason').value;
+      if (item.type === 'swap') {
+        selectSwapCandidate(TRIP.teacher, l.day, l.period, item.teacherB, item.dayB, item.periodB, l.date, item.dateB, l.className, item.classB, null);
+      } else {
+        /* 블록도 보강 형태로 계획서 생성 (연속 2교시는 각각 생성) */
+        selectSubCandidate(TRIP.teacher, item.teacherB, l.day, l.period, l.className, l.date, null);
       }
+      document.getElementById('diffCard').scrollIntoView({ behavior: 'smooth' });
+    }
 
-      var items = tripState.lessons.map(function(l) {
-        var a = tripState.assignments[l.id];
-        if (a && a.type === '수업교체') {
-          return {
-            shortDateA: l.shortDate,
-            cls: l.pureClass,
-            periodA: l.period,
-            subjectA: l.subject,
-            teacherA: tripState.teacher,
-            typeLabel: '교체',
-            isSwap: true,
-            shortDateB: a.shortDateB || a.dateB,
-            clsB: l.pureClass,
-            periodB: a.periodB,
-            subjectB: a.subjectB || l.subject,
-            teacherB: a.teacherB
-          };
-        } else if (a && a.type === '수업보강') {
-          return {
-            shortDateA: l.shortDate,
-            cls: l.pureClass,
-            periodA: l.period,
-            subjectA: l.subject,
-            teacherA: tripState.teacher,
-            typeLabel: '보강',
-            isSwap: false,
-            shortDateB: l.shortDate,
-            clsB: l.pureClass,
-            periodB: l.period,
-            subjectB: l.subject,
-            teacherB: a.teacherB
-          };
-        } else {
-          return {
-            shortDateA: l.shortDate,
-            cls: l.pureClass,
-            periodA: l.period,
-            subjectA: l.subject,
-            teacherA: tripState.teacher,
-            typeLabel: '보강',
-            isSwap: false,
-            shortDateB: l.shortDate,
-            clsB: l.pureClass,
-            periodB: l.period,
-            subjectB: l.subject,
-            teacherB: ''
-          };
-        }
-      });
-
-      var dateList = tripState.dateList || [];
-      var firstDate = (dateList[0] && dateList[0].date) || tripState.startDate;
-      var lastDate = (dateList[dateList.length - 1] && dateList[dateList.length - 1].date) || tripState.startDate;
-      var dateRangeStr = firstDate + " ~ " + lastDate;
-
-      var p = {
-        teacherA: tripState.teacher,
-        reason: tripState.reason,
-        category: (tripState.lessons[0] && tripState.lessons[0].category) || '교과',
-        subjectA: (tripState.lessons[0] && tripState.lessons[0].subject) || '교과수업',
-        shortDateA: dateRangeStr,
-        items: items
-      };
-
-      var section0Xml = buildHwpxSection0Xml(p);
-      var fileName = "2026_출장결보강계획서_" + tripState.teacher + "T_" + firstDate + ".hwpx";
-
-      downloadHwpxFromSection0(section0Xml, fileName, btn, "📄 출장 결보강 계획서 다운로드 (HWPX)");
+    /* ═══════════════════════════
+       메인 탭 전환 (단건 / 출장 일괄)
+       - 계획서 요약(diffCard)·확인 카드(confirmationCard)는 양쪽 탭 공유
+       ═══════════════════════════ */
+    function switchMainTab(tab) {
+      var isSingle = (tab === 'single');
+      document.getElementById('tabSingle').style.display = isSingle ? 'block' : 'none';
+      document.getElementById('tabTrip').style.display = isSingle ? 'none' : 'block';
+      document.getElementById('tabSingleRight').style.display = isSingle ? 'block' : 'none';
+      document.getElementById('tabTripRight').style.display = isSingle ? 'none' : 'block';
+      document.getElementById('tabBtnSingle').classList.toggle('active', isSingle);
+      document.getElementById('tabBtnTrip').classList.toggle('active', !isSingle);
     }
 
   </script>
