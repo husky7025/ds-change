@@ -585,6 +585,155 @@
       background: #fff1f2;
       border-color: #fecdd3;
     }
+
+    /* ── 사용 설명서 모달 스타일 ── */
+    .help-modal-card {
+      background: white;
+      border-radius: 16px;
+      max-width: 880px;
+      width: 95%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.28);
+      overflow: hidden;
+      animation: modalFadeIn 0.2s ease-out;
+    }
+    .help-modal-header {
+      padding: 14px 20px;
+      background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .help-modal-header h3 {
+      font-size: 16px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+    }
+    .help-modal-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 8px 16px;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--gray-200);
+      font-size: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+    .help-nav-chip {
+      padding: 3px 9px;
+      border-radius: 12px;
+      background: white;
+      border: 1px solid var(--gray-300);
+      color: var(--gray-700);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 11.5px;
+      transition: all 0.15s;
+    }
+    .help-nav-chip:hover {
+      background: var(--primary-light);
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+    .help-modal-body {
+      padding: 20px 24px;
+      overflow-y: auto;
+      font-size: 13.5px;
+      line-height: 1.7;
+      color: var(--gray-800);
+      scroll-behavior: smooth;
+    }
+    .help-section {
+      margin-bottom: 24px;
+      padding-top: 8px;
+    }
+    .help-modal-body h2 {
+      font-size: 15.5px;
+      font-weight: 800;
+      color: #1e3a8a;
+      margin: 0 0 10px 0;
+      padding-bottom: 6px;
+      border-bottom: 2px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .help-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0 14px 0;
+      font-size: 12.5px;
+    }
+    .help-table th, .help-table td {
+      border: 1px solid var(--gray-300);
+      padding: 7px 11px;
+      text-align: left;
+    }
+    .help-table th {
+      background: #f1f5f9;
+      color: #334155;
+      font-weight: 700;
+    }
+    .help-callout-tip {
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      padding: 9px 13px;
+      border-radius: 0 8px 8px 0;
+      margin: 10px 0;
+      font-size: 12.5px;
+      color: #1e40af;
+    }
+    .help-callout-warn {
+      background: #fffbeb;
+      border-left: 4px solid #f59e0b;
+      padding: 9px 13px;
+      border-radius: 0 8px 8px 0;
+      margin: 10px 0;
+      font-size: 12.5px;
+      color: #92400e;
+    }
+    .help-step-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 10px 13px;
+      margin: 8px 0;
+    }
+    .help-step-title {
+      font-weight: 800;
+      color: #1e293b;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .help-step-badge {
+      background: #2563eb;
+      color: white;
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+    .help-modal-footer {
+      padding: 12px 20px;
+      background: #f8fafc;
+      border-top: 1px solid var(--gray-200);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--gray-500);
+    }
+
 </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
@@ -598,7 +747,8 @@
       <span class="badge-school">2026 대전동산고</span>
     </div>
     <div class="nav-actions">
-      <a class="btn btn-sm btn-white" href="timetable-sample.csv" download="시간표_샘플.csv" style="text-decoration:none;">📥 샘플 다운로드</a>
+      <button type="button" class="btn btn-sm btn-white" onclick="openHelpModal()" style="cursor:pointer;" title="사용 설명서 보기">📖 사용 설명서</button>
+      <a class="btn btn-sm btn-white" href="timetable-sample.csv" download="시간표_양식.csv" style="text-decoration:none;">📥 시간표 양식 다운로드</a>
     </div>
   </div>
 
@@ -3121,6 +3271,246 @@ function loadTimetableOnStart() {
       downloadHwpxFromSection0(section0Xml, fileName, btn, "📄 출장 결보강 계획서 다운로드 (HWPX)");
     }
 
+  
+    /* ── 사용 설명서 모달 제어 ── */
+    function openHelpModal() {
+      const m = document.getElementById('helpModal');
+      if (m) m.classList.add('show');
+    }
+    function closeHelpModal() {
+      const m = document.getElementById('helpModal');
+      if (m) m.classList.remove('show');
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeHelpModal();
+      }
+    });
+
   </script>
+
+  <!-- ── 📖 결보강 탐색기 사용 설명서 모달 ── -->
+  <div id="helpModal" class="modal-overlay" onclick="if(event.target===this) closeHelpModal()">
+    <div class="help-modal-card">
+      <div class="help-modal-header">
+        <h3>📖 결보강 탐색기 사용 설명서</h3>
+        <button class="btn btn-sm btn-white" onclick="closeHelpModal()" style="font-size:16px; padding:2px 8px; border:none; cursor:pointer;" title="닫기">✕</button>
+      </div>
+
+      <div class="help-modal-nav">
+        <a href="#help-sec-1" class="help-nav-chip">1. 탐색기란?</a>
+        <a href="#help-sec-2" class="help-nav-chip">2. 시간표 불러오기</a>
+        <a href="#help-sec-3" class="help-nav-chip">3. 화면 구성</a>
+        <a href="#help-sec-4" class="help-nav-chip">4. 단일 차시 탐색</a>
+        <a href="#help-sec-5" class="help-nav-chip">5. 출장 패키지 모드</a>
+        <a href="#help-sec-6" class="help-nav-chip">6. 결과 표 해석</a>
+        <a href="#help-sec-7" class="help-nav-chip">7. 내 시간표</a>
+        <a href="#help-sec-8" class="help-nav-chip">8. 시뮬레이션</a>
+        <a href="#help-sec-9" class="help-nav-chip">9. 파일 교체</a>
+        <a href="#help-sec-10" class="help-nav-chip">10. 자주 묻는 질문</a>
+        <a href="#help-sec-11" class="help-nav-chip">11. 한눈에 정리</a>
+      </div>
+
+      <div class="help-modal-body">
+        <div style="background:#f1f5f9; padding:12px 16px; border-radius:8px; margin-bottom:18px; font-size:12.5px;">
+          <strong>수업(교체·보강) 계획서 자동 탐색 도구</strong> | 대전동산고등학교 표준 (GitHub Pages 정적 버전 v2)<br>
+          <span style="color:var(--gray-600);">이 설명서는 컴퓨터가 익숙하지 않은 선생님도 쉽게 따라하실 수 있도록 제작되었습니다. 결강·보강 업무가 처음이신 분도 순서대로 진행하시면 완벽하게 처리됩니다.</span>
+        </div>
+
+        <section id="help-sec-1" class="help-section">
+          <h2>1. 결보강 탐색기란?</h2>
+          <p>선생님이 출장·연가·병가 등으로 수업을 비우게 되었을 때, <strong>누가 그 수업을 대신 맡거나 맞바꿀 수 있는지 자동으로 찾아주는 도구</strong>입니다.</p>
+          <ul style="margin:6px 0 10px 20px;">
+            <li>시간표를 일일이 대조하지 않아도 됩니다.</li>
+            <li>공강인 선생님, 같은 과목 선생님을 우선으로 찾아줍니다.</li>
+            <li>찾은 결과를 바로 <strong>결보강 계획서(HWPX/PDF)</strong>로 출력할 수 있습니다.</li>
+          </ul>
+          <div class="help-callout-tip">
+            <strong>💡 용어 정리 (처음 보시는 분께)</strong>
+            <table class="help-table" style="margin-top:6px; background:white;">
+              <tr><th style="width:110px;">단어</th><th>뜻</th></tr>
+              <tr><td><strong>결강</strong></td><td>선생님이 자리를 비워서 원래 수업이 열리지 않는 것</td></tr>
+              <tr><td><strong>보강</strong></td><td>비는 수업을 다른 선생님이 대신 맡아 들어가는 것</td></tr>
+              <tr><td><strong>교체 (맞교환)</strong></td><td>두 선생님이 서로의 수업 시간을 맞바꾸어 진행하는 것 (학교 권장 1순위)</td></tr>
+              <tr><td><strong>공강</strong></td><td>선생님이 수업이 배정되지 않은 빈 시간</td></tr>
+              <tr><td><strong>시간표 파일</strong></td><td>전교사의 시간표가 들어 있는 기본 데이터 (timetable.csv)</td></tr>
+            </table>
+          </div>
+        </section>
+
+        <section id="help-sec-2" class="help-section">
+          <h2>2. 처음 열면: 시간표 불러오기</h2>
+          <p>탐색기를 열면 시간표가 자동으로 불러와집니다. 화면 상단의 상태 배너에 "✅ 시간표 데이터 준비 완료"가 나타나는지 확인하세요.</p>
+          <ul style="margin:6px 0 10px 20px;">
+            <li>시간표가 확인되면 바로 탐색을 시작할 수 있습니다.</li>
+            <li>시간표가 비어 있거나 "불러오기 실패"가 뜨면, 같은 폴더에 <code>timetable.csv</code> 파일이 있는지 확인하세요.</li>
+          </ul>
+          <div class="help-callout-tip">
+            💡 이 도구는 인터넷 외부 서버 없이, <strong>선생님의 브라우저 화면 안에서만 안전하게 동작</strong>합니다. 개인정보나 학교 시간표가 외부로 절대 전송되지 않습니다.
+          </div>
+        </section>
+
+        <section id="help-sec-3" class="help-section">
+          <h2>3. 화면 구성</h2>
+          <p>화면은 크게 두 가지 모드로 나뉩니다. 상단 탭을 눌러 언제든 자유롭게 전환할 수 있습니다.</p>
+          <table class="help-table">
+            <tr><th style="width:160px;">모드</th><th>언제 쓰나요?</th></tr>
+            <tr><td><strong>🔍 단일 차시 탐색</strong></td><td>하루 중 한두 시간만 비울 때 (예: 오늘 2~3교시만 출장 또는 연가)</td></tr>
+            <tr><td><strong>✈️ 출장·연가 패키지 모드</strong></td><td>며칠씩 자리를 비울 때 (예: 3일 출장, 일주일 연가로 여러 수업 일괄 처리)</td></tr>
+          </table>
+
+          <p style="margin-top:10px;">그 밖에 자주 쓰는 유용한 버튼들입니다.</p>
+          <table class="help-table">
+            <tr><th style="width:160px;">버튼</th><th>기능 설명</th></tr>
+            <tr><td><strong>📊 내 시간표</strong></td><td>특정 선생님의 일주일(월~금 1~7교시) 시간표를 한눈에 조회합니다.</td></tr>
+            <tr><td><strong>🔍 변동 시간표 시뮬레이션</strong></td><td>교체·보강을 적용했을 때 시간표가 어떻게 바뀌는지 전후를 미리 비교합니다.</td></tr>
+            <tr><td><strong>📋 메신저 복사</strong></td><td>결과를 교내 메신저나 카카오톡 단톡방에 붙여넣기 좋게 깔끔한 텍스트로 복사합니다.</td></tr>
+            <tr><td><strong>🖨️ 계획서 인쇄(PDF)</strong></td><td>대전동산고 공문 서식에 맞추어 바로 인쇄하거나 PDF로 저장합니다.</td></tr>
+            <tr><td><strong>📥 HWPX 다운로드</strong></td><td>한글(HWPX) 원본 파일로 내려받아 세부 내용을 다듬거나 전자결재에 첨부합니다.</td></tr>
+          </table>
+        </section>
+
+        <section id="help-sec-4" class="help-section">
+          <h2>4. 단일 차시 탐색하기 (한두 시간만 비울 때)</h2>
+          <div class="help-step-box">
+            <div class="help-step-title"><span class="help-step-badge">1단계</span> 기준 교사명을 입력합니다</div>
+            자리를 비우는 선생님의 이름을 입력합니다. (예: <code>권상명</code>)
+          </div>
+          <div class="help-step-box">
+            <div class="help-step-title"><span class="help-step-badge">2단계</span> 결강 사유를 선택합니다</div>
+            출장 / 연가 / 병가 / 공가 / 특별휴가 / 기타 중에서 선택합니다.
+          </div>
+          <div class="help-step-box">
+            <div class="help-step-title"><span class="help-step-badge">3단계</span> 결강 날짜와 교시를 정합니다</div>
+            1. <strong>결강/교체 일자</strong> 달력에서 날짜를 고르면 요일이 자동으로 연동됩니다.<br>
+            2. <strong>결강/교체 교시</strong>에서 비는 교시(1~7교시)를 누릅니다. (여러 교시 다중 선택 가능)
+          </div>
+          <div class="help-step-box">
+            <div class="help-step-title"><span class="help-step-badge">4단계</span> 탐색 옵션 설정 (선택 사항)</div>
+            - <strong>특정 보강 교사</strong>: "이 선생님께 부탁드리고 싶다"는 분이 있으면 이름을 직접 지정할 수 있습니다.<br>
+            - <strong>연속수업 방지</strong>: 앞뒤로 수업이 연달아 붙어 피로도가 가중되는 것을 방지합니다.
+          </div>
+          <div class="help-step-box">
+            <div class="help-step-title"><span class="help-step-badge">5단계</span> 결과 확인 및 최적 후보 선택</div>
+            후보는 <strong>1) 동일 교과군 우선</strong> → <strong>2) 공강 교사</strong> → <strong>3) 보강 누적 횟수가 적은 교사(부하 분산)</strong> 순으로 자동 정렬됩니다.
+          </div>
+          <div class="help-step-box">
+            <div class="help-step-title"><span class="help-step-badge">6단계</span> 계획서 출력</div>
+            <strong>🖨️ 계획서 인쇄(PDF)</strong> 또는 <strong>📥 HWPX 다운로드</strong> 버튼을 눌러 양식을 출력합니다.
+          </div>
+        </section>
+
+        <section id="help-sec-5" class="help-section">
+          <h2>5. 출장·연가 패키지 모드 (며칠씩 비울 때)</h2>
+          <p>2~3일 출장이나 일주일 연가처럼 <strong>기간 내 여러 차시 수업을 한 번에 일괄 처리</strong>할 때 사용합니다.</p>
+          <div class="help-step-box">
+            <div class="help-step-title"><span class="help-step-badge">1단계</span> 출장 정보 입력</div>
+            출장 교사명 입력 후, 달력에서 <strong>시작일</strong>과 <strong>종료일</strong>을 선택합니다.
+          </div>
+          <div class="help-step-box">
+            <div class="help-step-title"><span class="help-step-badge">2단계</span> 출장 수업 일괄 추출</div>
+            <strong>[출장 수업 불러오기]</strong> 버튼을 누르면 해당 기간 내 모든 수업 목록이 표로 정렬되어 나타납니다.
+          </div>
+          <div class="help-step-box">
+            <div class="help-step-title"><span class="help-step-badge">3단계</span> 원클릭 최적 자동 배정 (교체 1순위)</div>
+            <strong>[원클릭 최적 자동 배정]</strong>을 누르면 시스템이 스스로 다음 원칙에 따라 최적 매칭합니다:
+            <ul style="margin:4px 0 0 16px;">
+              <li><strong>수업 교체(1:1 맞교환) 1순위</strong>: 파트너가 희소한 차시부터 우선 매칭하여 성립률 100% 극대화</li>
+              <li>교체 불가 차시만 보강(2순위)으로 자동 전환</li>
+              <li>동일 학급 수업은 가능한 같은 선생님이 맡도록 연속성 보장</li>
+              <li>교사별 일일/누적 보강 부하 자동 분산</li>
+            </ul>
+          </div>
+          <div class="help-step-box">
+            <div class="help-step-title"><span class="help-step-badge">4단계</span> 1장 일괄 출력</div>
+            드롭다운에서 마음에 드는 후보로 언제든 변경할 수 있으며, <strong>[출장 계획서 HWPX 일괄 다운로드]</strong>를 누르면 1장의 결재 대장으로 즉시 생성됩니다.
+          </div>
+        </section>
+
+        <section id="help-sec-6" class="help-section">
+          <h2>6. 결과 표 보는 방법</h2>
+          <table class="help-table">
+            <tr><th style="width:130px;">표시</th><th>뜻과 추천 기준</th></tr>
+            <tr><td><span style="color:#2563eb; font-weight:700;">🔄 [교체]</span></td><td>서로 수업을 1:1로 맞바꾸는 형태 (학교 행정 권장 1순위)</td></tr>
+            <tr><td><span style="color:#059669; font-weight:700;">📋 [보강]</span></td><td>상대 교사가 빈 시간에 대신 들어가는 형태 (2순위)</td></tr>
+            <tr><td><strong>동일 교과</strong></td><td>결강 과목과 같은 과목군 선생님 (수업 연속성 최고)</td></tr>
+            <tr><td><strong>연속수업 주의</strong></td><td>앞뒤 시간에 이미 수업이 있어 2~3시간 연속 수업이 되는 경우</td></tr>
+            <tr><td><strong>누적 배정</strong></td><td>이번 출장 기간 동안 해당 선생님에게 배정된 총 차시 수</td></tr>
+          </table>
+        </section>
+
+        <section id="help-sec-7" class="help-section">
+          <h2>7. 내 시간표 보기</h2>
+          <p>특정 선생님의 주간 시간표가 궁금할 때 상단의 <strong>[📊 내 시간표]</strong> 버튼을 누르고 교사명을 입력하면 월~금 1~7교시 시간표를 한눈에 확인할 수 있습니다.</p>
+        </section>
+
+        <section id="help-sec-8" class="help-section">
+          <h2>8. 변동 시간표 시뮬레이션 비교</h2>
+          <p>"이렇게 교체하면 시간표가 어떻게 바뀔까?"를 확정하기 전에 미리 검증하는 기능입니다.</p>
+          <ul style="margin:6px 0 10px 20px;">
+            <li>후보를 선택한 후 <strong>[🔍 변동 시간표 시뮬레이션 비교]</strong>를 누릅니다.</li>
+            <li>변경 전 시간표와 변경 후 시간표가 나란히 비교되어 충돌 여부를 한눈에 점검할 수 있습니다.</li>
+            <li>화면 상의 가상 시뮬레이션이므로 실제 원본 데이터가 바뀌지 않으니 안심하고 테스트하세요.</li>
+          </ul>
+        </section>
+
+        <section id="help-sec-9" class="help-section">
+          <h2>9. 시간표 파일 교체하기 (새 학기/시간표 변동 시)</h2>
+          <p>시간표는 프로젝트 내 <code>timetable.csv</code> 파일 하나로 관리됩니다.</p>
+          <ol style="margin:6px 0 10px 20px;">
+            <li>우측 상단의 <strong>[📥 시간표 양식 다운로드]</strong>를 받아 엑셀에서 전체 선생님의 시간표를 작성합니다.</li>
+            <li>엑셀에서 <strong>[다른 이름으로 저장] → 파일 형식: CSV UTF-8</strong>로 저장합니다.</li>
+            <li>기존 <code>timetable.csv</code> 파일에 덮어쓰기(바꿔치기)한 뒤 웹 화면을 새로고침(F5)합니다.</li>
+          </ol>
+          <div class="help-callout-warn">
+            <strong>⚠️ 주의할 점</strong><br>
+            • 학급명은 반드시 <code>2-1</code>, <code>3-9</code>처럼 "학년-반" 형태로 기재해야 합니다.<br>
+            • 엑셀에서 <code>3-9</code>가 날짜(3월 9일)로 자동 변환되는 것을 방지하기 위해 텍스트 서식으로 입력하세요. (시스템 내 자동 복원 기능도 내장되어 있습니다.)
+          </div>
+        </section>
+
+        <section id="help-sec-10" class="help-section">
+          <h2>10. 자주 묻는 질문 (FAQ)</h2>
+          <div style="margin-bottom:12px;">
+            <strong style="color:#1e3a8a;">Q. 교체가 가능한 후보가 보이는데 자동 배정에서 보강으로 배정되었어요. 왜 그런가요?</strong><br>
+            <span>A. 다른 차시가 해당 교사의 공강 슬롯을 먼저 선점했거나, 출장 교사 본인의 복귀 후 시간표에 충돌이 발생하는 경우입니다. 본 시스템은 <strong>희소 교체 우선 알고리즘</strong>을 통해 전체 수업 중 교체 성립률을 극대화하도록 최적 배치합니다.</span>
+          </div>
+          <div style="margin-bottom:12px;">
+            <strong style="color:#1e3a8a;">Q. 계획서 인쇄 시 배경 색상이나 표 테두리가 나오지 않아요.</strong><br>
+            <span>A. 브라우저 인쇄 대화상자에서 <strong>[설정 더보기] → [배경 그래픽]</strong> 항목에 반드시 체크해 주세요. 여백은 <strong>'없음'</strong>으로 설정하시면 학교 표준 규격에 완벽히 들어맞습니다.</span>
+          </div>
+          <div style="margin-bottom:12px;">
+            <strong style="color:#1e3a8a;">Q. 한글(HWPX) 파일로 직접 편집하고 싶어요.</strong><br>
+            <span>A. <strong>[📥 HWPX 다운로드]</strong> 버튼을 누르시면 대전동산고 표준 19열 서식 및 학교장 명의가 반영된 온전한 .hwpx 파일이 다운로드됩니다. 한컴오피스에서 열어 결재를 올리시면 됩니다.</span>
+          </div>
+          <div style="margin-bottom:12px;">
+            <strong style="color:#1e3a8a;">Q. 데이터가 외부 인터넷에 유출되지 않나요?</strong><br>
+            <span>A. 전혀 유출되지 않습니다. 모든 연산과 시간표 검색은 선생님의 PC 브라우저 메모리 안에서만 100% 정적으로 처리됩니다.</span>
+          </div>
+        </section>
+
+        <section id="help-sec-11" class="help-section">
+          <h2>11. 한눈에 보는 요약</h2>
+          <table class="help-table">
+            <tr><th style="width:200px;">하고 싶은 일</th><th>실행 방법</th></tr>
+            <tr><td><strong>한두 시간만 대신 맡을 교사 찾기</strong></td><td>🔍 단일 차시 탐색 → 교사·날짜·교시 입력 → 탐색</td></tr>
+            <tr><td><strong>며칠 출장/연가 한 번에 정리하기</strong></td><td>✈️ 출장·연가 모드 → 교사·기간 입력 → 출장 수업 불러오기 → 자동 배정</td></tr>
+            <tr><td><strong>특정 선생님 시간표 확인</strong></td><td>📊 내 시간표 버튼 클릭 후 교사명 입력</td></tr>
+            <tr><td><strong>시간표 변경 사전 검증</strong></td><td>🔍 변동 시간표 시뮬레이션 비교 클릭</td></tr>
+            <tr><td><strong>결재용 계획서 출력</strong></td><td>🖨️ 계획서 인쇄(PDF) 또는 📥 HWPX 다운로드</td></tr>
+            <tr><td><strong>카카오톡/메신저 공유</strong></td><td>📋 메신저 복사 클릭 후 대화방에 붙여넣기</td></tr>
+            <tr><td><strong>새 학기 시간표 교체</strong></td><td>시간표 양식 다운로드 → 새 timetable.csv 저장 후 새로고침</td></tr>
+          </table>
+        </section>
+      </div>
+
+      <div class="help-modal-footer">
+        <span>💡 문의: 결보강 업무 담당 교사 | 대전동산고등학교</span>
+        <button class="btn btn-sm btn-primary" onclick="closeHelpModal()">확인 및 닫기</button>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
