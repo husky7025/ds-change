@@ -748,6 +748,8 @@
     </div>
     <div class="nav-actions">
       <button type="button" class="btn btn-sm btn-white" onclick="openHelpModal()" style="cursor:pointer;" title="사용 설명서 보기">📖 사용 설명서</button>
+      <a class="btn btn-sm btn-white" href="https://docs.google.com/spreadsheets/d/13hLG1pmVcUquG8gk_Q98uN87XfIqFVSJyd8H92acqZE/edit?gid=0#gid=0" target="_blank" rel="noopener" style="text-decoration:none;" title="기준 구글 스프레드시트 열기">📊 시간표 시트 열기</a>
+      <button type="button" class="btn btn-sm btn-white" onclick="loadTimetableOnStart(true)" style="cursor:pointer;" title="구글 시트 최신 시간표 다시 불러오기">🔄 시트 동기화</button>
       <a class="btn btn-sm btn-white" href="timetable-sample.csv" download="시간표_양식.csv" style="text-decoration:none;">📥 시간표 양식 다운로드</a>
     </div>
   </div>
@@ -1178,11 +1180,30 @@
   <script src="engine.js?v=20261026_v2"></script>
   <script>
 /* ═══════════════════════════════════════════════════════════════
-   데이터 레이어 (GitHub 정적 버전 v1.2)
-   - 시간표는 GitHub의 timetable.csv만 사용 (업로드 기능 없음)
-   - 학기 교체 시 관리자가 timetable.csv 파일만 교체하면 전체 자동 갱신
+   데이터 레이어 (Google Sheets 실시간 연동 v2.0)
+   - 1순위: 구글 스프레드시트 실시간 CSV 로드 (수정 시 실시간 반영)
+   - 2순위: 구글 시트 로드 실패 시 로컬 timetable.csv 백업 로드
    ═══════════════════════════════════════════════════════════════ */
-var GB = { scheduleList: [], scheduleIndex: {}, allTeachers: [], isSample: false, loaded: false };
+var GOOGLE_SHEET_CONFIG = {
+  sheetId: "13hLG1pmVcUquG8gk_Q98uN87XfIqFVSJyd8H92acqZE",
+  gid: "0",
+  get csvUrl() {
+    return "https://docs.google.com/spreadsheets/d/" + this.sheetId + "/export?format=csv&gid=" + this.gid;
+  },
+  get webUrl() {
+    return "https://docs.google.com/spreadsheets/d/" + this.sheetId + "/edit?gid=" + this.gid;
+  }
+};
+
+var GB = {
+  scheduleList: [],
+  scheduleIndex: {},
+  allTeachers: [],
+  isSample: false,
+  loaded: false,
+  source: "",
+  syncTime: ""
+};
 
 function rebuildEngine(csvText) {
   var data = parseCSV(csvText);
@@ -1212,15 +1233,19 @@ function updateDataBanner() {
   if (!GB.loaded || !GB.scheduleList.length) {
     banner.style.display = 'block';
     banner.className = 'data-banner warn';
-    banner.innerHTML = "⚠️ 시간표 데이터를 불러오지 못했습니다. 관리자에게 문의해주세요.";
+    banner.innerHTML = "⚠️ 시간표 데이터를 불러오지 못했습니다. <a href='javascript:void(0)' onclick='loadTimetableOnStart(true)' style='color:#b45309;font-weight:700;margin-left:8px;text-decoration:underline;'>🔄 다시 시도</a>";
   } else if (GB.isSample) {
     banner.style.display = 'block';
     banner.className = 'data-banner warn';
-    banner.innerHTML = "⚠️ 현재 <b>샘플 데이터</b>로 동작 중입니다. 관리자가 GitHub의 <b>timetable.csv</b>를 실제 시간표로 교체해주세요.";
+    banner.innerHTML = "⚠️ 현재 <b>샘플 데이터</b>로 동작 중입니다. <a href='" + GOOGLE_SHEET_CONFIG.webUrl + "' target='_blank' rel='noopener' style='color:#b45309;font-weight:700;margin-left:6px;text-decoration:underline;'>📊 구글 시트 확인하기</a>";
   } else {
     banner.style.display = 'block';
     banner.className = 'data-banner ok';
-    banner.innerHTML = "✅ 시간표 로드됨 (" + GB.allTeachers.length + "명)";
+    var srcText = GB.source === 'google_sheet' ? "📊 구글 스프레드시트 실시간 연동" : "📁 저장소 백업 시간표";
+    var timeText = GB.syncTime ? " (" + GB.syncTime + " 동기화)" : "";
+    banner.innerHTML = "✅ <b>" + srcText + "</b> — 전체 교사 " + GB.allTeachers.length + "명 로드됨" + timeText +
+      " <button type='button' onclick='loadTimetableOnStart(true)' style='margin-left:10px;padding:2px 8px;font-size:11px;border-radius:4px;border:1px solid #10b981;background:#ffffff;cursor:pointer;color:#065f46;font-weight:700;'>🔄 실시간 동기화</button>" +
+      " <a href='" + GOOGLE_SHEET_CONFIG.webUrl + "' target='_blank' rel='noopener' style='margin-left:6px;font-size:11px;color:#047857;text-decoration:underline;'>시트 열기 ↗</a>";
   }
 }
 
@@ -1229,7 +1254,6 @@ function isSampleCSV(text) {
   return firstLine.indexOf("결보강 시간표 샘플") >= 0;
 }
 
-/* GitHub Pages가 EUC-KR CSV를 UTF-8로 잘못 읽는 경우 자동 보정 */
 function decodeCSVBuffer(buf) {
   var t = "";
   try { t = new TextDecoder("utf-8").decode(buf); } catch (e) {}
@@ -1239,25 +1263,66 @@ function decodeCSVBuffer(buf) {
   return t;
 }
 
-function loadTimetableOnStart() {
-  fetch("timetable.csv?ts=" + Date.now()).then(function(r) {
-    if (!r.ok) throw new Error("no csv");
-    return r.arrayBuffer();
-  }).then(function(buf) {
-    var t = decodeCSVBuffer(buf);
-    rebuildEngine(t);
-    GB.isSample = isSampleCSV(t);
-    updateDataBanner();
-  }).catch(function() {
-    GB.loaded = false;
-    updateDataBanner();
-  });
+function loadTimetableOnStart(isManual) {
+  var banner = document.getElementById('dataBanner');
+  if (isManual && banner) {
+    banner.style.display = 'block';
+    banner.className = 'data-banner';
+    banner.style.background = '#e0e7ff';
+    banner.style.color = '#3730a3';
+    banner.style.border = '1px solid #c7d2fe';
+    banner.innerHTML = "⏳ 구글 스프레드시트에서 최신 시간표를 동기화하는 중...";
+  }
+
+  function fetchBuffer(url, timeoutMs) {
+    return new Promise(function(resolve, reject) {
+      var timer = setTimeout(function() { reject(new Error("Timeout: " + url)); }, timeoutMs || 6000);
+      var fetchUrl = url + (url.indexOf("?") >= 0 ? "&" : "?") + "ts=" + Date.now();
+      fetch(fetchUrl).then(function(r) {
+        clearTimeout(timer);
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.arrayBuffer();
+      }).then(resolve).catch(function(err) {
+        clearTimeout(timer);
+        reject(err);
+      });
+    });
+  }
+
+  // 1순위: 구글 스프레드시트 실시간 CSV
+  fetchBuffer(GOOGLE_SHEET_CONFIG.csvUrl, 5000)
+    .then(function(buf) {
+      var t = decodeCSVBuffer(buf);
+      rebuildEngine(t);
+      GB.source = "google_sheet";
+      GB.isSample = isSampleCSV(t);
+      GB.syncTime = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      updateDataBanner();
+      if (isManual) alert("구글 스프레드시트의 최신 시간표가 성공적으로 동기화되었습니다! (" + GB.allTeachers.length + "명)");
+    })
+    .catch(function(sheetErr) {
+      console.warn("Google Sheet load failed, fallback to local timetable.csv:", sheetErr);
+      // 2순위: 저장소의 timetable.csv 백업
+      fetchBuffer("timetable.csv", 4000)
+        .then(function(buf) {
+          var t = decodeCSVBuffer(buf);
+          rebuildEngine(t);
+          GB.source = "local_csv";
+          GB.isSample = isSampleCSV(t);
+          GB.syncTime = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+          updateDataBanner();
+          if (isManual) alert("구글 시트 연결 실패로 로컬 저장소 시간표를 로드했습니다.");
+        })
+        .catch(function(localErr) {
+          console.error("All timetable load failed:", localErr);
+          GB.loaded = false;
+          updateDataBanner();
+          if (isManual) alert("시간표를 불러오지 못했습니다. 네트워크 연결을 확인해주세요.");
+        });
+    });
 }
 
-    /* ═══════════════════════════
-       전역 변수 & 초기화
-    ═══════════════════════════ */
-    var dayMap = { 0: "일", 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "토" };
+var dayMap = { 0: "일", 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "토" };
     var currentConfirmedData = null;
 
     window.onload = function() {
