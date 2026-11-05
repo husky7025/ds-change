@@ -188,6 +188,21 @@ function getBlockedReason(dateStr, grade) {
   return (byGrade[1] && byGrade[2] && byGrade[3]) ? byGrade[1] : "";
 }
 
+/* 그날 일정을 이름별로 묶어 돌려준다: [{ name, grades }] */
+function getCalendarEvents(dateStr) {
+  const fixed = schoolCalendarDates[dateStr] || PUBLIC_HOLIDAYS[dateStr];
+  if (fixed) return [{ name: fixed, grades: [1, 2, 3] }];
+  const byGrade = neisCalendarDates[dateStr];
+  if (!byGrade) return [];
+  const events = [];
+  Object.keys(byGrade).sort().forEach(function(g) {
+    const found = events.find(function(ev) { return ev.name === byGrade[g]; });
+    if (found) found.grades.push(Number(g));
+    else events.push({ name: byGrade[g], grades: [Number(g)] });
+  });
+  return events;
+}
+
 function gradeOfClass(className) {
   const m = String(className || "").match(/^(\d)-/);
   return m ? parseInt(m[1], 10) : 0;
@@ -881,5 +896,5 @@ function buildTripWeekComparison(scheduleList, tripLessons, assignments, teacher
 if (typeof module !== "undefined" && module.exports) {
   module.exports = { deduceSubjectCategory, buildTeacherSubjectMap, parseCSV, parseSheetValues, buildScheduleIndex, isTeacherFree, checkConsecutive,
     searchScheduleLocal, findCommonFreeTimeLocal, simulateSwapLocal, simulateSubstituteLocal,
-    getTeacherTimetableLocal, extractClassName, splitClassName, buildGridData, getTripLessonsForDates, analyzeClassContinuity, getTripCandidatesForLesson, autoAssignTripSubstitutes, getTripSwapCandidatesForLesson, buildTripWeekComparison, getBlockedReason, gradeOfClass, setNeisCalendar, setSchoolCalendar, parseSchoolCalendar };
+    getTeacherTimetableLocal, extractClassName, splitClassName, buildGridData, getTripLessonsForDates, analyzeClassContinuity, getTripCandidatesForLesson, autoAssignTripSubstitutes, getTripSwapCandidatesForLesson, buildTripWeekComparison, getBlockedReason, getCalendarEvents, gradeOfClass, setNeisCalendar, setSchoolCalendar, parseSchoolCalendar };
 }

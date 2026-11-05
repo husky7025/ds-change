@@ -961,6 +961,34 @@
     .room-name { font-size: 11px; color: var(--gray-500); }
 
     /* 휴대폰 */
+    /* 학사일정 달력 */
+    .calendar-toolbar { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 12px; }
+    .calendar-toolbar strong { min-width: 110px; text-align: center; font-size: 16px; font-weight: 700; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-top: 1px solid var(--gray-200); border-left: 1px solid var(--gray-200); }
+    .calendar-head, .calendar-day { border-right: 1px solid var(--gray-200); border-bottom: 1px solid var(--gray-200); }
+    .calendar-head { padding: 6px 2px; text-align: center; font-size: 12px; font-weight: 600; color: var(--gray-500); background: var(--gray-50); }
+    .calendar-day { min-height: 76px; padding: 5px; background: var(--surface); overflow: hidden; }
+    .calendar-day.other { background: var(--gray-50); }
+    .calendar-day.other .calendar-num { color: var(--gray-400); }
+    .calendar-day.closed { background: #fee2e2; }
+    .calendar-day.partial { background: #fef3c7; }
+    .calendar-num { display: inline-block; min-width: 22px; height: 22px; line-height: 22px; text-align: center; font-size: 13px; font-weight: 600; color: var(--gray-700); border-radius: 50%; }
+    .calendar-day.sun .calendar-num { color: #dc2626; }
+    .calendar-day.sat .calendar-num { color: var(--primary); }
+    .calendar-day.today .calendar-num { background: var(--primary); color: #fff; }
+    .calendar-event { margin-top: 2px; font-size: 11px; line-height: 1.3; color: var(--gray-700); word-break: keep-all; }
+    .calendar-legend { display: flex; flex-wrap: wrap; gap: 12px; margin: 10px 0; font-size: 12px; color: var(--gray-600); }
+    .calendar-legend i { display: inline-block; width: 12px; height: 12px; margin-right: 4px; vertical-align: -1px; border: 1px solid var(--gray-300); border-radius: 3px; }
+    .calendar-list { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--gray-200); }
+    .calendar-list li { display: flex; gap: 12px; padding: 7px 2px; font-size: 13px; border-bottom: 1px solid var(--gray-100); }
+    .calendar-list b { flex: 0 0 104px; font-weight: 600; color: var(--gray-700); }
+    .calendar-empty { padding: 14px 2px; font-size: 13px; color: var(--gray-500); }
+    @media (max-width: 640px) {
+      .calendar-day { min-height: 48px; padding: 3px; }
+      .calendar-event { display: none; }
+      .calendar-list b { flex-basis: 92px; }
+    }
+
     .date-notice { margin-top: 6px; padding: 7px 10px; border-radius: var(--radius-sm); background: #fef3c7; color: #92400e; font-size: 13px; }
 
     @media (max-width: 640px) {
@@ -1077,6 +1105,7 @@
       <span class="badge-school">2026 대전동산고</span>
     </div>
     <div class="nav-actions">
+      <button type="button" class="btn btn-sm btn-white" onclick="openCalendarModal()" title="학사일정 달력 보기">📅 달력</button>
       <button type="button" class="btn btn-sm btn-white" onclick="openHelpModal()" style="cursor:pointer;" title="사용 설명서 보기">📖 사용 설명서</button>
       <a class="btn btn-sm btn-white" href="https://docs.google.com/spreadsheets/d/13hLG1pmVcUquG8gk_Q98uN87XfIqFVSJyd8H92acqZE/edit?gid=0#gid=0" target="_blank" rel="noopener" style="text-decoration:none;" title="기준 구글 스프레드시트 열기">📊 시간표 시트 열기</a>
       <button type="button" class="btn btn-sm btn-white" onclick="loadTimetableOnStart(true)" style="cursor:pointer;" title="구글 시트 최신 시간표 다시 불러오기">🔄 시트 동기화</button>
@@ -1475,6 +1504,28 @@
 
   </div>
 
+  <!-- ── 학사일정 달력 모달 ── -->
+  <div class="modal-overlay" id="calendarModal" onclick="if(event.target===this) closeCalendarModal()">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>📅 학사일정 달력</h3>
+        <span style="display:flex; gap:8px; align-items:center;"><button type="button" class="btn btn-sm btn-white no-print" onclick="window.print()">🖨️ 인쇄</button><button class="modal-close" onclick="closeCalendarModal()" aria-label="닫기">✕</button></span>
+      </div>
+      <div class="calendar-toolbar">
+        <button type="button" class="btn btn-sm btn-white no-print" onclick="moveCalendarMonth(-1)" aria-label="이전 달">◀</button>
+        <strong id="calendarTitle"></strong>
+        <button type="button" class="btn btn-sm btn-white no-print" onclick="moveCalendarMonth(1)" aria-label="다음 달">▶</button>
+      </div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+      <div class="calendar-legend">
+        <span><i style="background:#fee2e2;"></i>전 학년 수업 없음</span>
+        <span><i style="background:#fef3c7;"></i>일부 학년 수업 없음</span>
+        <span id="calendarUpdated"></span>
+      </div>
+      <ul class="calendar-list" id="calendarList"></ul>
+    </div>
+  </div>
+
 <!-- ── 4. 내 시간표 팝업 모달 ── -->
   <div class="modal-overlay" id="teacherModal">
     <div class="modal-card">
@@ -1524,7 +1575,7 @@
     </div>
   </div>
 
-  <script src="engine.js?v=20261105_v6e"></script>
+  <script src="engine.js?v=20261105_v6f"></script>
   <script>
 /* ═══════════════════════════════════════════════════════════════
    데이터 레이어 (Google Sheets 실시간 연동 v2.0)
@@ -1752,6 +1803,87 @@ var dayMap = { 0: "일", 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "�
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#39;");
+    }
+
+    /* ── 학사일정 달력 ── */
+    var calendarView = { year: 0, month: 0 };
+
+    function calendarDateStr(year, month, day) {
+      return year + '-' + String(month + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+    }
+
+    function calendarEventLabel(ev) {
+      var name = ev.name.replace(/\s*\([^)]*학년[^)]*\)/, '');
+      if (ev.grades.length >= 3 || /^\d학년/.test(name)) return name;
+      return ev.grades.join('·') + '학년 ' + name;
+    }
+
+    function openCalendarModal() {
+      var base = document.getElementById('targetDate').value;
+      var d = base ? new Date(base + 'T00:00:00') : new Date();
+      calendarView = { year: d.getFullYear(), month: d.getMonth() };
+      renderCalendar();
+      document.getElementById('calendarModal').classList.add('show');
+    }
+
+    function closeCalendarModal() {
+      document.getElementById('calendarModal').classList.remove('show');
+    }
+
+    function moveCalendarMonth(delta) {
+      var d = new Date(calendarView.year, calendarView.month + delta, 1);
+      calendarView = { year: d.getFullYear(), month: d.getMonth() };
+      renderCalendar();
+    }
+
+    function renderCalendar() {
+      var year = calendarView.year, month = calendarView.month;
+      var now = new Date();
+      var todayStr = calendarDateStr(now.getFullYear(), now.getMonth(), now.getDate());
+      var first = new Date(year, month, 1);
+      var cells = ['일', '월', '화', '수', '목', '금', '토'].map(function(n) { return "<div class='calendar-head'>" + n + "</div>"; }).join('');
+      var rows = [];
+
+      for (var i = 0; i < 42; i++) {
+        var d = new Date(year, month, 1 - first.getDay() + i);
+        if (i >= 35 && d.getMonth() !== month) break;
+        var dateStr = calendarDateStr(d.getFullYear(), d.getMonth(), d.getDate());
+        var dow = d.getDay();
+        var inMonth = d.getMonth() === month;
+        var events = (dow === 0 || dow === 6) ? [] : getCalendarEvents(dateStr);
+        var labels = events.map(calendarEventLabel);
+        var cls = 'calendar-day';
+        if (!inMonth) cls += ' other';
+        if (dow === 0) cls += ' sun';
+        if (dow === 6) cls += ' sat';
+        if (dateStr === todayStr) cls += ' today';
+        if (inMonth && events.length) cls += getBlockedReason(dateStr) ? ' closed' : ' partial';
+        cells += "<div class='" + cls + "'><span class='calendar-num'>" + d.getDate() + "</span>" +
+          (inMonth ? labels.map(function(t) { return "<div class='calendar-event'>" + escapeHtml(t) + "</div>"; }).join('') : '') + "</div>";
+
+        if (inMonth && dow >= 1 && dow <= 5) {
+          var key = labels.join(', ');
+          var last = rows[rows.length - 1];
+          if (key && last && last.key === key && last.open) {
+            last.end = d;
+          } else if (key) {
+            rows.push({ key: key, start: d, end: d, open: true });
+          } else if (last) {
+            last.open = false; // 수업일이 끼면 기간을 끊는다
+          }
+        }
+      }
+
+      function shortDay(x) { return (x.getMonth() + 1) + '/' + x.getDate() + '(' + dayMap[x.getDay()] + ')'; }
+      var list = rows.map(function(r) {
+        var when = r.start.getTime() === r.end.getTime() ? shortDay(r.start) : shortDay(r.start) + '~' + r.end.getDate() + '일';
+        return "<li><b>" + when + "</b><span>" + escapeHtml(r.key) + "</span></li>";
+      }).join('');
+
+      document.getElementById('calendarTitle').textContent = year + '년 ' + (month + 1) + '월';
+      document.getElementById('calendarGrid').innerHTML = cells;
+      document.getElementById('calendarList').innerHTML = list || "<li class='calendar-empty'>이번 달에 등록된 일정이 없습니다.</li>";
+      document.getElementById('calendarUpdated').textContent = GB.neisUpdated ? "나이스 갱신: " + GB.neisUpdated : "";
     }
 
     function updateDateNotice() {
@@ -3568,6 +3700,7 @@ var dayMap = { 0: "일", 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "�
           <p style="margin-top:10px;">그 밖에 자주 쓰는 유용한 버튼들입니다.</p>
           <table class="help-table">
             <tr><th style="width:160px;">버튼</th><th>기능 설명</th></tr>
+            <tr><td><strong>📅 달력</strong></td><td>공휴일·방학·시험처럼 수업이 없는 날을 월별 달력으로 봅니다.</td></tr>
             <tr><td><strong>📊 내 시간표</strong></td><td>특정 선생님의 일주일(월~금 1~7교시) 시간표를 한눈에 조회합니다.</td></tr>
             <tr><td><strong>🔍 변동 시간표 시뮬레이션</strong></td><td>교체·보강을 적용했을 때 시간표가 어떻게 바뀌는지 전후를 미리 비교합니다.</td></tr>
             <tr><td><strong>📋 메신저 복사</strong></td><td>결과를 교내 메신저나 카카오톡 단톡방에 붙여넣기 좋게 깔끔한 텍스트로 복사합니다.</td></tr>
