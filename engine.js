@@ -4,6 +4,9 @@
    - 원본 시간표 기준 정적 판단 수행
    - [v2 업데이트] 과목별 교과군 판별 및 교사별 주 교과군 자동 매핑
    - [v2 업데이트] 보강 후보 탐색 시 결강 과목과 동일 교과군 교사 우선 정렬
+   - [v5 수정] 출장 기간 안으로 교체되는 오류, 자동 배정의 "제한 없음" 무시 수정
+   - [v5 수정] 교과군 판별 보강, 과목명의 숫자(과2·제2 등)를 반으로 읽는 오류 수정
+   - [v5 수정] 이어지는 수업 표시(│, ▽)를 앞 교시 수업으로 처리
    ═══════════════════════════════════════════════════════════════ */
 
 const DAY_IDX = { "월": 1, "화": 2, "수": 3, "목": 4, "금": 5 };
@@ -16,7 +19,7 @@ function extractClassName(text) {
 
 /* [수정] 시트에서 "3-9"가 날짜로 변환돼 CSV로 내려오는 경우("03월 09일") 원래 학급 표기로 복원 */
 function normalizeClassroom(text) {
-  const t = String(text || "").trim();
+  let t = String(text || "").trim().replace(/^="?|"?$/g, "");
   const m = t.match(/(\d+)\s*월\s*(\d+)\s*일/);
   if (m) return String(parseInt(m[1], 10)) + "-" + String(parseInt(m[2], 10));
   return t;
@@ -24,7 +27,8 @@ function normalizeClassroom(text) {
 
 function splitClassName(className) {
   const t = String(className || "");
-  const m = t.match(/(\d+\s*-\s*\d+)/);
+  // 과목명에 숫자가 있어도(예: 과2-1-9) 끝에 있는 학년-반을 먼저 찾는다
+  const m = t.match(/(\d+\s*-\s*\d+)\s*$/) || t.match(/(\d+\s*-\s*\d+)/);
   if (m) {
     const cls = m[1].replace(/\s+/g, "");
     const subj = t.slice(0, m.index).replace(/[-–—\s]+$/, "").trim() || t;
@@ -33,19 +37,30 @@ function splitClassName(className) {
   return { subj: t, cls: "" };
 }
 
-/* 과목명 기반 교과군 판별 */
+/* 시간표에 쓰는 줄임 과목명 → 교과군 (실제 담당 교사의 다른 과목으로 확인한 값) */
+const SUBJECT_CATEGORY_MAP = {
+  "국1": "국어", "국2": "국어",
+  "세지": "사회", "도탐": "사회", "현윤": "사회", "법사": "사회",
+  "세포": "과학", "역학": "과학", "물질": "과학", "물역": "과학", "역물": "과학", "물지": "과학", "지세": "과학",
+  "스생": "체육",
+  "음연": "예술",
+  "제2": "제2외국어/한문", "일문": "제2외국어/한문", "중문": "제2외국어/한문"
+};
+
+/* 과목명 기반 교과군 판별 (물·화·생·지·과처럼 넓은 글자를 쓰는 과학 판별은 맨 마지막) */
 function deduceSubjectCategory(subj) {
   if (!subj) return "교과";
-  subj = String(subj);
+  subj = splitClassName(String(subj)).subj.replace(/\s+/g, "");
+  if (SUBJECT_CATEGORY_MAP[subj]) return SUBJECT_CATEGORY_MAP[subj];
   if (subj.includes("국어") || subj.includes("문학") || subj.includes("심국") || subj.includes("독서") || subj.includes("화작") || subj.includes("언매")) return "국어";
   if (subj.includes("수학") || subj.includes("미적") || subj.includes("기하") || subj.includes("수통") || subj.includes("수적") || subj.includes("확통")) return "수학";
   if (subj.includes("영어") || subj.includes("영Ⅱ") || subj.includes("심영") || subj.includes("미영") || subj.includes("영회")) return "영어";
-  if (subj.includes("물") || subj.includes("화") || subj.includes("생") || subj.includes("지") || subj.includes("과") || subj.includes("통과")) return "과학";
-  if (subj.includes("역사") || subj.includes("한국") || subj.includes("사회") || subj.includes("통사") || subj.includes("세지") || subj.includes("정법") || subj.includes("윤리") || subj.includes("경제")) return "사회";
+  if (subj.includes("한문") || subj.includes("일본") || subj.includes("중국") || subj.includes("제2외")) return "제2외국어/한문";
+  if (subj.includes("역사") || subj.includes("한국") || subj.includes("사회") || subj.includes("통사") || subj.includes("세지") || subj.includes("정법") || subj.includes("윤리") || subj.includes("경제") || subj.includes("지리")) return "사회";
   if (subj.includes("정보") || subj.includes("프로") || subj.includes("공일") || subj.includes("기술") || subj.includes("가정") || subj.includes("인공지능")) return "기술·가정";
   if (subj.includes("체육") || subj.includes("운동") || subj.includes("스포츠")) return "체육";
   if (subj.includes("음악") || subj.includes("미술") || subj.includes("연극")) return "예술";
-  if (subj.includes("한문") || subj.includes("일본") || subj.includes("중국") || subj.includes("제2외")) return "제2외국어/한문";
+  if (subj.includes("물") || subj.includes("화") || subj.includes("생") || subj.includes("지") || subj.includes("과") || subj.includes("통과")) return "과학";
   return "교과";
 }
 
@@ -119,8 +134,16 @@ function parseSheetValues(data) {
       const rawSubject = String(data[r][t.colIndex] || "").trim();
       if (!rawSubject) return;
       const rawClassroom = normalizeClassroom(String((data[r + 1] || [])[t.colIndex] || "").trim());
-      const subject = rawSubject;
-      const classroom = rawClassroom;
+      let subject = rawSubject;
+      let classroom = rawClassroom;
+      /* 이어지는 수업 표시(│, ▽)는 바로 앞 교시 수업과 같은 반·과목으로 처리 */
+      const isContinued = /^[│|┃]$/.test(rawSubject) || /^[▽▼]$/.test(rawClassroom);
+      if (isContinued) {
+        const prev = scheduleList.find(function(s) {
+          return s.teacher === t.name && s.day === currentDay && s.period === period - 1;
+        });
+        if (prev) { subject = prev.subject; classroom = prev.classroom; }
+      }
       let combinedName = subject;
       if (classroom && !subject.includes(classroom)) combinedName = subject + "-" + classroom;
       const pureClass = extractClassName(classroom) || extractClassName(subject);
@@ -153,20 +176,21 @@ function isTeacherFree(scheduleIndex, teacher, day, period) {
 
 /* 연속수업 체크 (대장 없음) */
 function checkConsecutive(scheduleIndex, teacher, addDay, addPeriod, removeDay, removePeriod, limit) {
+  if (!limit || limit <= 0) return false;
   const dayPeriods = (scheduleIndex[teacher] && scheduleIndex[teacher][addDay]) || {};
-  let periods = Object.keys(dayPeriods).map(Number).filter(function(p) {
+  const periods = Object.keys(dayPeriods).map(Number).filter(function(p) {
     return !(addDay === removeDay && p === removePeriod);
   });
   if (periods.indexOf(addPeriod) < 0) periods.push(addPeriod);
-  periods.sort(function(a, b) { return a - b; });
-  for (let i = 0; i <= periods.length - limit; i++) {
-    let isSeq = true;
-    for (let k = 0; k < limit - 1; k++) {
-      if (periods[i + k + 1] !== periods[i + k] + 1) { isSeq = false; break; }
-    }
-    if (isSeq) return true;
-  }
-  return false;
+
+  // 새로 추가되는 교시(addPeriod)를 포함하는 연속 수업 길이 계산
+  let count = 1;
+  let pPrev = addPeriod - 1;
+  while (periods.indexOf(pPrev) >= 0) { count++; pPrev--; }
+  let pNext = addPeriod + 1;
+  while (periods.indexOf(pNext) >= 0) { count++; pNext++; }
+
+  return count >= limit;
 }
 
 function buildGridData(teacherLessons) {
@@ -457,6 +481,7 @@ function getTripSwapCandidatesForLesson(scheduleIndex, scheduleList, lesson, tri
       const mm = String(cDate.getMonth() + 1).padStart(2, '0');
       const dd = String(cDate.getDate()).padStart(2, '0');
       const dStr = yyyy + '-' + mm + '-' + dd;
+      if (tripDateStrings.indexOf(dStr) !== -1) continue; // 다음 주도 출장일이면 제외
       candidateDates.push({
         date: dStr,
         day: dayNames[d],
@@ -585,8 +610,9 @@ function getTripCandidatesForLesson(scheduleIndex, allTeachers, lesson, teacherS
 /**
  * 4. 출장 기간 전체 수업에 대한 '스마트 원클릭 자동 배정' 알고리즘
  */
-function autoAssignTripSubstitutes(scheduleIndex, scheduleList, allTeachers, tripLessons, teacherSubjectMap, consecutiveLimit, policy, allowNextWeek) {
+function autoAssignTripSubstitutes(scheduleIndex, scheduleList, allTeachers, tripLessons, teacherSubjectMap, consecutiveLimit, policy, allowNextWeek, tripDates) {
   if (typeof allowNextWeek === 'undefined') allowNextWeek = true;
+  if (typeof consecutiveLimit === 'undefined') consecutiveLimit = 3; // 0은 "제한 없음"이므로 그대로 둔다
   if (!policy) policy = 'swap_first';
 
   const classStats = analyzeClassContinuity(scheduleIndex, allTeachers, tripLessons);
@@ -595,7 +621,8 @@ function autoAssignTripSubstitutes(scheduleIndex, scheduleList, allTeachers, tri
   const currentAssignedToday = {};
   const assignments = {};
 
-  const tripDateStrings = [];
+  // 수업이 없는 출장일도 교체 대상에서 빠지도록 출장 기간 전체 날짜를 쓴다
+  const tripDateStrings = tripDates ? tripDates.slice() : [];
   tripLessons.forEach(function(l) {
     if (tripDateStrings.indexOf(l.date) === -1) tripDateStrings.push(l.date);
   });
@@ -614,7 +641,7 @@ function autoAssignTripSubstitutes(scheduleIndex, scheduleList, allTeachers, tri
     const swapCountsMap = {};
     tripLessons.forEach(function(l) {
       const c = getTripSwapCandidatesForLesson(
-        scheduleIndex, scheduleList, l, tripDateStrings, allowNextWeek, {}, consecutiveLimit || 3
+        scheduleIndex, scheduleList, l, tripDateStrings, allowNextWeek, {}, consecutiveLimit
       );
       swapCountsMap[l.id] = c.length;
     });
@@ -632,7 +659,7 @@ function autoAssignTripSubstitutes(scheduleIndex, scheduleList, allTeachers, tri
       if (assignments[lesson.id]) return;
 
       const swapCands = getTripSwapCandidatesForLesson(
-        scheduleIndex, scheduleList, lesson, tripDateStrings, allowNextWeek, assignedSlots, consecutiveLimit || 3
+        scheduleIndex, scheduleList, lesson, tripDateStrings, allowNextWeek, assignedSlots, consecutiveLimit
       );
 
       if (swapCands.length > 0) {
@@ -668,7 +695,7 @@ function autoAssignTripSubstitutes(scheduleIndex, scheduleList, allTeachers, tri
 
       const subCands = getTripCandidatesForLesson(
         scheduleIndex, allTeachers, lesson, teacherSubjectMap, classStats,
-        assignedSlots, currentAssignedCounts, currentAssignedToday, consecutiveLimit || 3
+        assignedSlots, currentAssignedCounts, currentAssignedToday, consecutiveLimit
       );
 
       if (subCands.length > 0) {
@@ -708,9 +735,75 @@ function autoAssignTripSubstitutes(scheduleIndex, scheduleList, allTeachers, tri
   };
 }
 
+/**
+ * 5. 교사별 전후 시간표 비교 (변경이 있는 주마다 하나씩 반환)
+ *    changed 값: removed(수업이 빠짐), added(수업이 들어옴), unassigned(미배정), conflict(같은 칸에 겹침)
+ */
+function buildTripWeekComparison(scheduleList, tripLessons, assignments, teacher, tripTeacher) {
+  const dayNames = ["", "월", "화", "수", "목", "금"];
+  const before = buildGridData(scheduleList.filter(function(s) { return s.teacher === teacher; }));
+  const weeks = {};
+
+  function weekOf(dateStr) {
+    const d = new Date(dateStr + 'T00:00:00');
+    const monday = new Date(d);
+    monday.setDate(d.getDate() - (d.getDay() - 1));
+    const key = monday.getFullYear() + '-' + String(monday.getMonth() + 1).padStart(2, '0') + '-' + String(monday.getDate()).padStart(2, '0');
+    if (!weeks[key]) {
+      const dayLabels = {};
+      for (let i = 1; i <= 5; i++) {
+        const c = new Date(monday);
+        c.setDate(monday.getDate() + i - 1);
+        dayLabels[dayNames[i]] = (c.getMonth() + 1) + '/' + c.getDate();
+      }
+      weeks[key] = { weekStart: key, dayLabels: dayLabels, removes: [], adds: [], unassigned: [] };
+    }
+    return weeks[key];
+  }
+
+  tripLessons.forEach(function(l) {
+    const a = assignments[l.id];
+    const isTripTeacher = (teacher === tripTeacher);
+    if (!a) {
+      if (isTripTeacher) weekOf(l.date).unassigned.push({ day: l.day, period: l.period });
+      return;
+    }
+    if (a.type === '수업교체') {
+      if (isTripTeacher) {
+        weekOf(l.date).removes.push({ day: l.day, period: l.period });
+        weekOf(a.dateB).adds.push({ day: a.dayB, period: a.periodB, text: l.className });
+      } else if (a.teacherB === teacher) {
+        weekOf(a.dateB).removes.push({ day: a.dayB, period: a.periodB });
+        weekOf(l.date).adds.push({ day: l.day, period: l.period, text: (a.subjectB || l.subject) + "-" + l.pureClass });
+      }
+    } else if (a.type === '수업보강') {
+      if (isTripTeacher) weekOf(l.date).removes.push({ day: l.day, period: l.period });
+      else if (a.teacherB === teacher) weekOf(l.date).adds.push({ day: l.day, period: l.period, text: l.className + "(보강)" });
+    }
+  });
+
+  return Object.keys(weeks).sort().map(function(key) {
+    const w = weeks[key];
+    const after = JSON.parse(JSON.stringify(before));
+    const changed = {};
+    w.removes.forEach(function(r) {
+      after[r.day][r.period] = "-";
+      changed[r.day + '_' + r.period] = 'removed';
+    });
+    w.unassigned.forEach(function(u) { changed[u.day + '_' + u.period] = 'unassigned'; });
+    w.adds.forEach(function(a) {
+      const k = a.day + '_' + a.period;
+      const isClash = after[a.day][a.period] !== "-";
+      after[a.day][a.period] = isClash ? after[a.day][a.period] + " / " + a.text : a.text;
+      changed[k] = isClash ? 'conflict' : 'added';
+    });
+    return { weekStart: w.weekStart, dayLabels: w.dayLabels, before: before, after: after, changed: changed };
+  });
+}
+
 /* Node 테스트용 export */
 if (typeof module !== "undefined" && module.exports) {
   module.exports = { deduceSubjectCategory, buildTeacherSubjectMap, parseCSV, parseSheetValues, buildScheduleIndex, isTeacherFree, checkConsecutive,
     searchScheduleLocal, findCommonFreeTimeLocal, simulateSwapLocal, simulateSubstituteLocal,
-    getTeacherTimetableLocal, extractClassName, splitClassName, buildGridData, getTripLessonsForDates, analyzeClassContinuity, getTripCandidatesForLesson, autoAssignTripSubstitutes, getTripSwapCandidatesForLesson };
+    getTeacherTimetableLocal, extractClassName, splitClassName, buildGridData, getTripLessonsForDates, analyzeClassContinuity, getTripCandidatesForLesson, autoAssignTripSubstitutes, getTripSwapCandidatesForLesson, buildTripWeekComparison };
 }

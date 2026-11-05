@@ -381,6 +381,10 @@
     .tt-table td { border-bottom: 1px solid var(--gray-200); padding: 4px 2px; height: 38px; vertical-align: middle; }
     .tt-table td:first-child { background: var(--gray-100); font-weight: 700; width: 34px; }
     .tt-table td.highlight-changed { background: #fef08a; font-weight: bold; color: #b91c1c; }
+    .tt-table td.cell-removed { background: #fee2e2; color: #b91c1c; text-decoration: line-through; }
+    .tt-table td.cell-added { background: #dcfce7; color: #15803d; font-weight: bold; }
+    .tt-table td.cell-unassigned { background: #fef08a; color: #b91c1c; font-weight: bold; }
+    .tt-table td.cell-conflict { background: #dc2626; color: white; font-weight: bold; }
 
     .subj-name { font-weight: 700; display: block; font-size: 10px; }
     .room-name { font-size: 9px; color: #888; }
@@ -1083,6 +1087,9 @@
           <button class="btn btn-success" id="btnDownloadTripHwpx" onclick="downloadTripHwpx()">
             📄 출장 결보강 계획서 다운로드 (HWPX)
           </button>
+          <button class="btn btn-white" id="btnTripSummary" onclick="openTripSummaryModal()">
+            📋 교체 내역 한눈에 보기
+          </button>
         </div>
       </div>
 
@@ -1154,6 +1161,20 @@
   </div>
 
   <!-- ── 5. 변동 시간표 시뮬레이션 비교 모달 ── -->
+  <div class="modal-overlay" id="tripSummaryModal" onclick="if(event.target===this) closeTripSummaryModal()">
+    <div class="modal-card" style="max-width: 900px;">
+      <div class="modal-header">
+        <h3 id="tripSummaryModalTitle">📋 교체 내역 한눈에 보기</h3>
+        <button class="modal-close" onclick="closeTripSummaryModal()">✕</button>
+      </div>
+      <div id="tripSummaryModalBody"></div>
+      <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; flex-wrap: wrap;">
+        <button class="btn btn-success" onclick="copyTripSummaryText()">📋 메신저 복사</button>
+        <button class="btn btn-white" onclick="closeTripSummaryModal()">닫기</button>
+      </div>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="simulationModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -1176,7 +1197,7 @@
     </div>
   </div>
 
-  <script src="engine.js?v=20261026_v2"></script>
+  <script src="engine.js?v=20261105_v5b"></script>
   <script>
 /* ═══════════════════════════════════════════════════════════════
    데이터 레이어 (Google Sheets 실시간 연동 v2.0)
@@ -1455,17 +1476,6 @@ var dayMap = { 0: "일", 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "�
       return { subj: str, cls: "" };
     }
 
-    function deduceSubjectCategory(subj) {
-      if (!subj) return "영어";
-      if (subj.includes("국어") || subj.includes("문학") || subj.includes("심국")) return "국어";
-      if (subj.includes("수학") || subj.includes("미적") || subj.includes("기하") || subj.includes("수통") || subj.includes("수적")) return "수학";
-      if (subj.includes("영어") || subj.includes("영Ⅱ") || subj.includes("심영") || subj.includes("미영")) return "영어";
-      if (subj.includes("물") || subj.includes("화") || subj.includes("생") || subj.includes("지") || subj.includes("과")) return "과학";
-      if (subj.includes("역사") || subj.includes("한국") || subj.includes("사회") || subj.includes("통사") || subj.includes("세지") || subj.includes("정법") || subj.includes("윤리")) return "사회";
-      if (subj.includes("정보") || subj.includes("프로") || subj.includes("공일") || subj.includes("기술")) return "기술·가정";
-      return "교과";
-    }
-
     /* ═══════════════════════════
        1. 수동 입력 변경시 실시간 계획서 반영
     ═══════════════════════════ */
@@ -1569,6 +1579,7 @@ var dayMap = { 0: "일", 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "�
       var tDay = res.targetDay || document.getElementById('day').value;
       var tPeriod = res.targetPeriod || document.getElementById('period').value;
       var tClass = res.targetClass || res.targetClassName || '';
+      var tClassName = res.targetClassName || tClass; // 계획서에는 과목이 포함된 이름을 넘긴다
 
       document.getElementById('summaryTargetText').textContent =
         tTeacher + "T | " + targetDate + " (" + tDay + ") " + tPeriod + "교시" + (tClass ? " [" + tClass + "]" : "");
@@ -1581,7 +1592,7 @@ var dayMap = { 0: "일", 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "�
         res.swapData.forEach(function(item) {
           totalCount++;
           var dateB = getDateForDay(targetDate, item.dayB);
-          var classB = item.classNameB || item.classB || tClass;
+          var classB = item.classNameB || item.classB || tClassName;
           var teacherBName = item.teacherB || item.teacher;
           var catBadge = item.categoryB ? " <span class='badge' style='background:var(--gray-200); color:var(--gray-700); font-size:10px;'>" + escapeHtml(item.categoryB) + "</span>" : "";
           appendCandidateRow(tbody, [
@@ -1593,7 +1604,7 @@ var dayMap = { 0: "일", 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "�
             selectSwapCandidate(
               tTeacher, tDay, tPeriod,
               teacherBName, item.dayB, item.periodB,
-              targetDate, dateB, tClass, classB, btn);
+              targetDate, dateB, tClassName, classB, btn);
           });
         });
       }
@@ -1613,7 +1624,7 @@ var dayMap = { 0: "일", 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "�
           ], '선택', 'btn btn-success btn-sm', function(btn) {
             selectSubCandidate(
               tTeacher, subTeacher, tDay,
-              tPeriod, tClass, targetDate, btn);
+              tPeriod, tClassName, targetDate, btn);
           });
         });
       }
@@ -2067,10 +2078,16 @@ var dayMap = { 0: "일", 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "�
     }
 
     /* [GitHub 정적 버전] 대장 기능 제외 → 변경 이력 표시 없음 */
-    function buildTimetableHTML(ttData, highlight) {
+    function buildTimetableHTML(ttData, highlight, opts) {
       var days = ["월", "화", "수", "목", "금"];
+      var cellClasses = (opts && opts.cellClasses) || {};
+      var dayLabels = (opts && opts.dayLabels) || {};
       var html = "<div class='tt-wrap'><table class='tt-table'>";
-      html += "<tr><th>교시</th><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th></tr>";
+      html += "<tr><th>교시</th>";
+      days.forEach(function(d) {
+        html += "<th>" + d + (dayLabels[d] ? "<br>" + escapeHtml(dayLabels[d]) : "") + "</th>";
+      });
+      html += "</tr>";
 
       for (var p = 1; p <= 7; p++) {
         html += "<tr><td>" + p + "</td>";
@@ -2080,6 +2097,8 @@ var dayMap = { 0: "일", 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "�
           var cellClass = "";
           if (highlight && highlight.day === d && highlight.period === p) {
             cellClass = "class='highlight-changed'";
+          } else if (cellClasses[d + "_" + p]) {
+            cellClass = "class='" + cellClasses[d + "_" + p] + "'";
           }
 
           var cellContent = "-";
@@ -2402,349 +2421,7 @@ var dayMap = { 0: "일", 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "�
        출장·연가 일괄 결보강 모드 클라이언트 로직 (Trip Mode Controller)
        - 시작일 ~ 종료일 달력 직접 선택
        - 1순위 수업 교체(맞교환/다음주) + 2순위 보강 자동 폴백
-       - 브라우저 캐시 대비 인라인 안전 폴백 내장
     ═══════════════════════════════════════════════════════════════════ */
-
-    // ── [안전 가드] engine.js 캐시 불일치 대비 인라인 폴백 함수 ──
-    if (typeof getTripLessonsForDates === 'undefined') {
-      window.getTripLessonsForDates = function(scheduleList, targetTeacher, dateList) {
-        var lessons = [];
-        var idCounter = 1;
-        dateList.forEach(function(dObj) {
-          var dayLessons = scheduleList.filter(function(s) {
-            return s.teacher === targetTeacher && s.day === dObj.day;
-          });
-          dayLessons.sort(function(a, b) { return a.period - b.period; });
-          dayLessons.forEach(function(l) {
-            var parsed = splitClassName(l.className);
-            var pureCls = l.pureClass || parsed.cls || l.className;
-            var subj = parsed.subj || l.className;
-            var cat = deduceSubjectCategory(l.className || subj);
-            lessons.push({
-              id: 'trip_lesson_' + (idCounter++),
-              date: dObj.date,
-              day: dObj.day,
-              shortDate: dObj.shortDate || dObj.date,
-              period: l.period,
-              className: l.className,
-              pureClass: pureCls,
-              subject: subj,
-              category: cat,
-              targetTeacher: targetTeacher
-            });
-          });
-        });
-        return lessons;
-      };
-    }
-
-    if (typeof analyzeClassContinuity === 'undefined') {
-      window.analyzeClassContinuity = function(scheduleIndex, allTeachers, tripLessons) {
-        var classStats = {};
-        tripLessons.forEach(function(l) {
-          if (!classStats[l.pureClass]) {
-            classStats[l.pureClass] = { total: 0, lessons: [], teacherAvailableCounts: {} };
-          }
-          classStats[l.pureClass].total++;
-          classStats[l.pureClass].lessons.push(l);
-        });
-        Object.keys(classStats).forEach(function(cls) {
-          var cInfo = classStats[cls];
-          allTeachers.forEach(function(tName) {
-            var freeCount = 0;
-            cInfo.lessons.forEach(function(l) {
-              if (isTeacherFree(scheduleIndex, tName, l.day, l.period)) freeCount++;
-            });
-            cInfo.teacherAvailableCounts[tName] = freeCount;
-          });
-        });
-        return classStats;
-      };
-    }
-
-    if (typeof getTripSwapCandidatesForLesson === 'undefined') {
-      window.getTripSwapCandidatesForLesson = function(scheduleIndex, scheduleList, lesson, tripDateStrings, allowNextWeek, assignedSlots, consecutiveLimit) {
-        var targetTeacher = lesson.targetTeacher;
-        var targetClass = lesson.pureClass;
-        var targetDateStr = lesson.date;
-        var targetDay = lesson.day;
-        var targetPeriod = lesson.period;
-
-        var curDate = new Date(targetDateStr + 'T00:00:00');
-        var dow = curDate.getDay();
-        var monday = new Date(curDate);
-        monday.setDate(curDate.getDate() - (dow - 1));
-
-        var dayNames = ["", "월", "화", "수", "목", "금"];
-        var candidateDates = [];
-
-        for (var d = 1; d <= 5; d++) {
-          var cDate = new Date(monday);
-          cDate.setDate(monday.getDate() + (d - 1));
-          var yyyy = cDate.getFullYear();
-          var mm = String(cDate.getMonth() + 1).padStart(2, '0');
-          var dd = String(cDate.getDate()).padStart(2, '0');
-          var dStr = yyyy + '-' + mm + '-' + dd;
-          if (tripDateStrings.indexOf(dStr) === -1) {
-            candidateDates.push({
-              date: dStr,
-              day: dayNames[d],
-              shortDate: (cDate.getMonth() + 1) + '/' + cDate.getDate(),
-              isNextWeek: false
-            });
-          }
-        }
-
-        if (allowNextWeek) {
-          var nextMonday = new Date(monday);
-          nextMonday.setDate(monday.getDate() + 7);
-          for (var d = 1; d <= 5; d++) {
-            var cDate = new Date(nextMonday);
-            cDate.setDate(nextMonday.getDate() + (d - 1));
-            var yyyy = cDate.getFullYear();
-            var mm = String(cDate.getMonth() + 1).padStart(2, '0');
-            var dd = String(cDate.getDate()).padStart(2, '0');
-            var dStr = yyyy + '-' + mm + '-' + dd;
-            candidateDates.push({
-              date: dStr,
-              day: dayNames[d],
-              shortDate: (cDate.getMonth() + 1) + '/' + cDate.getDate(),
-              isNextWeek: true
-            });
-          }
-        }
-
-        var swapCandidates = [];
-        candidateDates.forEach(function(candDateObj) {
-          var dayB = candDateObj.day;
-          var dateB = candDateObj.date;
-
-          var matchingLessons = scheduleList.filter(function(s) {
-            var pCls = s.pureClass || splitClassName(s.className).cls || s.className;
-            return pCls === targetClass && s.teacher !== targetTeacher && s.day === dayB;
-          });
-
-          matchingLessons.forEach(function(lessonB) {
-            var teacherB = lessonB.teacher;
-            var periodB = lessonB.period;
-
-            if (!isTeacherFree(scheduleIndex, teacherB, targetDay, targetPeriod)) return;
-            if (!isTeacherFree(scheduleIndex, targetTeacher, dayB, periodB)) return;
-
-            var slotA = targetDateStr + '_' + targetPeriod;
-            var slotB = dateB + '_' + periodB;
-            if (assignedSlots) {
-              if (assignedSlots[teacherB] && assignedSlots[teacherB][slotA]) return;
-              if (assignedSlots[targetTeacher] && assignedSlots[targetTeacher][slotB]) return;
-              if (assignedSlots[teacherB] && assignedSlots[teacherB][slotB]) return;
-            }
-
-            if (consecutiveLimit > 0) {
-              if (checkConsecutive(scheduleIndex, teacherB, targetDay, targetPeriod, dayB, periodB, consecutiveLimit)) return;
-              if (checkConsecutive(scheduleIndex, targetTeacher, dayB, periodB, targetDay, targetPeriod, consecutiveLimit)) return;
-            }
-
-            var parsedB = splitClassName(lessonB.className);
-            var subjB = parsedB.subj || lessonB.className;
-            var catB = deduceSubjectCategory(lessonB.className || subjB);
-
-            swapCandidates.push({
-              type: '수업교체',
-              teacherB: teacherB,
-              dateB: dateB,
-              dayB: dayB,
-              shortDateB: candDateObj.shortDate,
-              periodB: periodB,
-              subjectB: subjB,
-              categoryB: catB,
-              classNameB: lessonB.className,
-              isNextWeek: candDateObj.isNextWeek
-            });
-          });
-        });
-
-        swapCandidates.sort(function(a, b) {
-          if (a.isNextWeek !== b.isNextWeek) return a.isNextWeek ? 1 : -1;
-          if (a.dateB !== b.dateB) return a.dateB.localeCompare(b.dateB);
-          return a.periodB - b.periodB;
-        });
-
-        return swapCandidates;
-      };
-    }
-
-    if (typeof getTripCandidatesForLesson === 'undefined') {
-      window.getTripCandidatesForLesson = function(scheduleIndex, allTeachers, lesson, teacherSubjectMap, classStats, assignedSlots, currentAssignedCounts, currentAssignedToday, consecutiveLimit) {
-        var targetCategory = lesson.category;
-        var clsStat = classStats[lesson.pureClass] || { total: 1, teacherAvailableCounts: {} };
-        var candidates = [];
-
-        allTeachers.forEach(function(tName) {
-          if (tName === lesson.targetTeacher) return;
-          if (!isTeacherFree(scheduleIndex, tName, lesson.day, lesson.period)) return;
-
-          var slotKey = lesson.date + '_' + lesson.period;
-          if (assignedSlots && assignedSlots[tName] && assignedSlots[tName][slotKey]) return;
-
-          if (consecutiveLimit > 0 && checkConsecutive(scheduleIndex, tName, lesson.day, lesson.period, '', 0, consecutiveLimit)) {
-            return;
-          }
-
-          var tCategory = teacherSubjectMap[tName] || '교과';
-          var isSameSubject = (tCategory === targetCategory);
-          var classFreeCount = (clsStat.teacherAvailableCounts && clsStat.teacherAvailableCounts[tName]) || 0;
-          var isFullContinuity = (clsStat.total > 1 && classFreeCount === clsStat.total);
-          var isPartialContinuity = (clsStat.total > 1 && classFreeCount > 1);
-
-          var totalAssigned = (currentAssignedCounts && currentAssignedCounts[tName]) || 0;
-          var todayAssigned = (currentAssignedToday && currentAssignedToday[tName] && currentAssignedToday[tName][lesson.date]) || 0;
-
-          var score = 0;
-          if (isSameSubject) score += 100;
-          if (isFullContinuity) score += 60;
-          else if (isPartialContinuity) score += 30;
-
-          score -= (totalAssigned * 25);
-          if (todayAssigned === 1) score -= 40;
-          if (todayAssigned >= 2) score -= 200;
-
-          candidates.push({
-            teacher: tName,
-            category: tCategory,
-            isSameSubject: isSameSubject,
-            classFreeCount: classFreeCount,
-            classTotalLessons: clsStat.total,
-            isFullContinuity: isFullContinuity,
-            isPartialContinuity: isPartialContinuity,
-            totalAssigned: totalAssigned,
-            todayAssigned: todayAssigned,
-            score: score
-          });
-        });
-
-        candidates.sort(function(a, b) {
-          if (b.score !== a.score) return b.score - a.score;
-          return a.teacher.localeCompare(b.teacher, 'ko');
-        });
-
-        return candidates;
-      };
-    }
-
-    if (typeof autoAssignTripSubstitutes === 'undefined') {
-      window.autoAssignTripSubstitutes = function(scheduleIndex, scheduleList, allTeachers, tripLessons, teacherSubjectMap, consecutiveLimit, policy, allowNextWeek) {
-        if (typeof allowNextWeek === 'undefined') allowNextWeek = true;
-        if (!policy) policy = 'swap_first';
-
-        var classStats = analyzeClassContinuity(scheduleIndex, allTeachers, tripLessons);
-        var assignedSlots = {};
-        var currentAssignedCounts = {};
-        var currentAssignedToday = {};
-        var assignments = {};
-
-        var tripDateStrings = [];
-        tripLessons.forEach(function(l) {
-          if (tripDateStrings.indexOf(l.date) === -1) tripDateStrings.push(l.date);
-        });
-
-        var sortedLessons = tripLessons.slice().sort(function(a, b) {
-          var countA = (classStats[a.pureClass] && classStats[a.pureClass].total) || 1;
-          var countB = (classStats[b.pureClass] && classStats[b.pureClass].total) || 1;
-          if (countB !== countA) return countB - countA;
-          if (a.date !== b.date) return a.date.localeCompare(b.date);
-          return a.period - b.period;
-        });
-
-        if (policy === 'swap_first' || policy === 'swap_only') {
-          // 희소한 수업(교체 파트너가 적은 수업)을 먼저 매칭하여 교체 성공률을 100%로 극대화
-          var swapCountsMap = {};
-          tripLessons.forEach(function(l) {
-            var c = getTripSwapCandidatesForLesson(
-              scheduleIndex, scheduleList, l, tripDateStrings, allowNextWeek, {}, consecutiveLimit || 3
-            );
-            swapCountsMap[l.id] = c.length;
-          });
-
-          var swapSortedLessons = tripLessons.slice().sort(function(a, b) {
-            var cntA = swapCountsMap[a.id];
-            var cntB = swapCountsMap[b.id];
-            if (cntA === 0 && cntB > 0) return 1;
-            if (cntB === 0 && cntA > 0) return -1;
-            if (cntA !== cntB) return cntA - cntB;
-            return a.date.localeCompare(b.date);
-          });
-
-          swapSortedLessons.forEach(function(lesson) {
-            if (assignments[lesson.id]) return;
-            var swapCands = getTripSwapCandidatesForLesson(
-              scheduleIndex, scheduleList, lesson, tripDateStrings, allowNextWeek, assignedSlots, consecutiveLimit || 3
-            );
-            if (swapCands.length > 0) {
-              var bestSwap = swapCands[0];
-              assignments[lesson.id] = {
-                type: '수업교체',
-                teacherB: bestSwap.teacherB,
-                dateB: bestSwap.dateB,
-                dayB: bestSwap.dayB,
-                shortDateB: bestSwap.shortDateB,
-                periodB: bestSwap.periodB,
-                subjectB: bestSwap.subjectB,
-                categoryB: bestSwap.categoryB,
-                classNameB: bestSwap.classNameB,
-                isNextWeek: bestSwap.isNextWeek
-              };
-              var tA = lesson.targetTeacher;
-              var tB = bestSwap.teacherB;
-              if (!assignedSlots[tB]) assignedSlots[tB] = {};
-              if (!assignedSlots[tA]) assignedSlots[tA] = {};
-              assignedSlots[tB][lesson.date + '_' + lesson.period] = true;
-              assignedSlots[tA][bestSwap.dateB + '_' + bestSwap.periodB] = true;
-              assignedSlots[tB][bestSwap.dateB + '_' + bestSwap.periodB] = true;
-            }
-          });
-        }
-
-        if (policy === 'swap_first' || policy === 'sub_only') {
-          sortedLessons.forEach(function(lesson) {
-            if (assignments[lesson.id]) return;
-            var subCands = getTripCandidatesForLesson(
-              scheduleIndex, allTeachers, lesson, teacherSubjectMap, classStats,
-              assignedSlots, currentAssignedCounts, currentAssignedToday, consecutiveLimit || 3
-            );
-            if (subCands.length > 0) {
-              var bestSub = subCands[0];
-              var tName = bestSub.teacher;
-              assignments[lesson.id] = {
-                type: '수업보강',
-                teacherB: tName,
-                dateB: lesson.date,
-                dayB: lesson.day,
-                shortDateB: lesson.shortDate,
-                periodB: lesson.period,
-                subjectB: lesson.subject,
-                categoryB: bestSub.category,
-                isSameSubject: bestSub.isSameSubject
-              };
-              if (!assignedSlots[tName]) assignedSlots[tName] = {};
-              assignedSlots[tName][lesson.date + '_' + lesson.period] = true;
-              currentAssignedCounts[tName] = (currentAssignedCounts[tName] || 0) + 1;
-              if (!currentAssignedToday[tName]) currentAssignedToday[tName] = {};
-              currentAssignedToday[tName][lesson.date] = (currentAssignedToday[tName][lesson.date] || 0) + 1;
-            } else {
-              assignments[lesson.id] = null;
-            }
-          });
-        }
-
-        return {
-          success: true,
-          assignments: assignments,
-          assignedCounts: currentAssignedCounts,
-          assignedToday: currentAssignedToday,
-          classStats: classStats
-        };
-      };
-    }
 
     var tripState = {
       teacher: '',
@@ -3150,7 +2827,8 @@ var dayMap = { 0: "일", 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "�
 
         var res = autoAssignTripSubstitutes(
           GB.scheduleIndex, GB.scheduleList, GB.allTeachers, tripState.lessons,
-          tripState.teacherSubjectMap, tripState.consecutiveLimit, policy, allowNextWeek
+          tripState.teacherSubjectMap, tripState.consecutiveLimit, policy, allowNextWeek,
+          tripState.dateList.map(function(d) { return d.date; })
         );
 
         tripState.assignments = res.assignments;
@@ -3244,6 +2922,227 @@ var dayMap = { 0: "일", 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "�
       });
 
       container.innerHTML = html;
+    }
+
+    /* ── 출장 교체·보강 내역 모아 보기 ── */
+    var tripSummaryTeachers = [];
+
+    function tripSlotLabel(shortDate, day, period) {
+      return shortDate + "(" + day + ") " + period + "교시";
+    }
+
+    function buildTripSummaryData() {
+      var rows = [];
+      var byTeacher = {};
+      var counts = { total: tripState.lessons.length, swap: 0, sub: 0, none: 0 };
+
+      function addDuty(teacher, date, period, text) {
+        if (!byTeacher[teacher]) byTeacher[teacher] = [];
+        byTeacher[teacher].push({ date: date, period: period, text: text });
+      }
+
+      tripState.lessons.forEach(function(l) {
+        var a = tripState.assignments[l.id];
+        var slotA = tripSlotLabel(l.shortDate, l.day, l.period);
+        var cls = l.pureClass || l.className;
+        var row = { slotA: slotA, cls: cls, subject: l.subject, type: '미배정', slotB: '', subjectB: '', teacherB: '', isNextWeek: false };
+
+        if (a && a.type === '수업교체') {
+          var slotB = tripSlotLabel(a.shortDateB || a.dateB, a.dayB, a.periodB);
+          var subjectB = a.subjectB || l.subject;
+          counts.swap++;
+          row.type = '교체';
+          row.slotB = slotB;
+          row.subjectB = subjectB;
+          row.teacherB = a.teacherB;
+          row.isNextWeek = !!a.isNextWeek;
+          // 두 선생님의 수업 시간이 서로 바뀐다
+          addDuty(a.teacherB, l.date, l.period, slotA + " " + cls + " " + subjectB + " 수업 (" + slotB + "에서 이동)");
+          addDuty(tripState.teacher, a.dateB, a.periodB, slotB + " " + cls + " " + l.subject + " 수업 (" + slotA + "에서 이동)");
+        } else if (a && a.type === '수업보강') {
+          counts.sub++;
+          row.type = '보강';
+          row.slotB = slotA;
+          row.subjectB = l.subject;
+          row.teacherB = a.teacherB;
+          addDuty(a.teacherB, l.date, l.period, slotA + " " + cls + " " + l.subject + " 보강");
+        } else {
+          counts.none++;
+        }
+        rows.push(row);
+      });
+
+      var names = Object.keys(byTeacher).sort(function(x, y) {
+        if (x === tripState.teacher) return -1;
+        if (y === tripState.teacher) return 1;
+        return x.localeCompare(y, 'ko');
+      });
+      var groups = names.map(function(name) {
+        var duties = byTeacher[name].slice().sort(function(x, y) {
+          if (x.date !== y.date) return x.date.localeCompare(y.date);
+          return x.period - y.period;
+        });
+        return { teacher: name, isTripTeacher: name === tripState.teacher, duties: duties };
+      });
+
+      return { counts: counts, rows: rows, groups: groups };
+    }
+
+    function openTripSummaryModal() {
+      if (!tripState.lessons || !tripState.lessons.length) {
+        alert("먼저 출장 수업을 불러와주세요.");
+        return;
+      }
+      var data = buildTripSummaryData();
+      var c = data.counts;
+
+      function stat(label, value, color) {
+        return "<div style='flex:1; min-width:90px; padding:8px 12px; border-radius:8px; background:var(--gray-100); text-align:center;'>" +
+          "<div style='font-size:11px; color:var(--gray-500); font-weight:600;'>" + label + "</div>" +
+          "<div style='font-size:18px; font-weight:800; color:" + color + ";'>" + value + "</div></div>";
+      }
+
+      var html = "<div style='font-size:12px; color:var(--gray-500); margin-bottom:8px;'>" +
+        escapeHtml(tripState.teacher) + "T · " + escapeHtml(tripState.reason || '') + " · " +
+        escapeHtml(tripState.startDate) + " ~ " + escapeHtml(tripState.endDate) + "</div>";
+
+      html += "<div style='display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;'>" +
+        stat("전체", c.total + "차시", "var(--gray-700)") +
+        stat("교체", c.swap + "건", "#4338ca") +
+        stat("보강", c.sub + "건", "#15803d") +
+        stat("미배정", c.none + "건", c.none > 0 ? "#dc2626" : "var(--gray-400)") + "</div>";
+
+      if (c.none > 0) {
+        html += "<div style='padding:8px 12px; margin-bottom:12px; border-radius:8px; background:#fef2f2; color:#b91c1c; font-size:12px; font-weight:700;'>" +
+          "⚠️ 아직 배정되지 않은 수업이 " + c.none + "건 있습니다.</div>";
+      }
+
+      html += "<div style='font-size:13px; font-weight:800; margin-bottom:6px;'>수업별 내역</div>" +
+        "<div style='overflow-x:auto; margin-bottom:16px;'><table class='compact-table' style='width:100%;'>" +
+        "<thead><tr><th>원래 수업</th><th>반 · 과목</th><th>구분</th><th>바뀐 수업</th><th>담당 교사</th></tr></thead><tbody>";
+
+      data.rows.forEach(function(r) {
+        var color = r.type === '교체' ? '#4338ca' : (r.type === '보강' ? '#15803d' : '#dc2626');
+        var bg = r.type === '교체' ? '#e0e7ff' : (r.type === '보강' ? '#dcfce7' : '#fee2e2');
+        var after = r.slotB ? escapeHtml(r.slotB + " " + r.subjectB) : "-";
+        if (r.isNextWeek) after += " <span style='font-size:10px; color:#b45309; font-weight:700;'>다음 주</span>";
+        html += "<tr><td>" + escapeHtml(r.slotA) + "</td>" +
+          "<td>" + escapeHtml(r.cls + " " + r.subject) + "</td>" +
+          "<td><span class='badge' style='background:" + bg + "; color:" + color + "; font-size:11px;'>" + r.type + "</span></td>" +
+          "<td>" + after + "</td>" +
+          "<td>" + (r.teacherB ? escapeHtml(r.teacherB) + "T" : "-") + "</td></tr>";
+      });
+      html += "</tbody></table></div>";
+
+      if (data.groups.length) {
+        html += "<div style='font-size:13px; font-weight:800; margin-bottom:6px;'>교사별 확인</div>" +
+          "<div style='display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:8px;'>";
+        data.groups.forEach(function(g, i) {
+          html += "<div style='border:1px solid var(--gray-200); border-radius:8px; padding:8px 10px;'>" +
+            "<div style='font-size:12px; font-weight:800; margin-bottom:4px;'>" + escapeHtml(g.teacher) + "T" +
+            (g.isTripTeacher ? " <span style='font-size:10px; color:var(--gray-500); font-weight:600;'>(출장 교사)</span>" : "") +
+            " · " + g.duties.length + "건</div>";
+          html += "<button type='button' class='btn btn-white btn-sm' style='margin:0 0 6px;' onclick='showTripCompare(" + i + ")'>🔍 시간표 비교</button>";
+          g.duties.forEach(function(d) {
+            html += "<div style='font-size:11px; color:var(--gray-700); line-height:1.6;'>" + escapeHtml(d.text) + "</div>";
+          });
+          html += "</div>";
+        });
+        html += "</div>";
+      }
+
+      if (data.groups.length) {
+        html += "<div id='tripCompareSection' style='margin-top:16px;'>" +
+          "<div style='display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:6px;'>" +
+          "<div style='font-size:13px; font-weight:800;'>전후 시간표 비교</div>" +
+          "<select id='tripCompareTeacher' onchange='renderTripCompare()' style='width:auto; min-width:140px;'>";
+        data.groups.forEach(function(g, i) {
+          html += "<option value='" + i + "'>" + escapeHtml(g.teacher) + "T" + (g.isTripTeacher ? " (출장 교사)" : "") + "</option>";
+        });
+        html += "</select></div>" +
+          "<div style='display:flex; gap:10px; flex-wrap:wrap; font-size:11px; margin-bottom:8px; color:var(--gray-500);'>" +
+          "<span><b style='color:#b91c1c;'>■</b> 빠지는 수업</span>" +
+          "<span><b style='color:#15803d;'>■</b> 새로 맡는 수업</span>" +
+          "<span><b style='color:#ca8a04;'>■</b> 미배정</span></div>" +
+          "<div id='tripCompareArea'></div></div>";
+      }
+
+      tripSummaryTeachers = data.groups.map(function(g) { return g.teacher; });
+      document.getElementById('tripSummaryModalBody').innerHTML = html;
+      document.getElementById('tripSummaryModal').classList.add('show');
+      if (data.groups.length) renderTripCompare();
+    }
+
+    function showTripCompare(index) {
+      document.getElementById('tripCompareTeacher').value = String(index);
+      renderTripCompare();
+      document.getElementById('tripCompareSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function renderTripCompare() {
+      var area = document.getElementById('tripCompareArea');
+      var teacher = tripSummaryTeachers[parseInt(document.getElementById('tripCompareTeacher').value, 10)];
+      var weeks = buildTripWeekComparison(GB.scheduleList, tripState.lessons, tripState.assignments, teacher, tripState.teacher);
+      var classNames = { removed: 'cell-removed', added: 'cell-added', unassigned: 'cell-unassigned', conflict: 'cell-conflict' };
+
+      var html = "";
+      weeks.forEach(function(w) {
+        var beforeClasses = {};
+        var afterClasses = {};
+        Object.keys(w.changed).forEach(function(k) {
+          var state = w.changed[k];
+          if (state === 'added') afterClasses[k] = classNames.added;
+          else if (state === 'removed') beforeClasses[k] = classNames.removed;
+          else { beforeClasses[k] = classNames[state]; afterClasses[k] = classNames[state]; }
+        });
+        var range = w.dayLabels["월"] + " ~ " + w.dayLabels["금"];
+        html += "<div style='font-size:12px; font-weight:800; margin:10px 0 4px;'>📅 " + escapeHtml(range) + "</div>" +
+          "<div class='flex-tables-grid'>" +
+          "<div><h4 style='font-size:12px; margin-bottom:4px;'>기존 시간표</h4>" +
+          buildTimetableHTML(w.before, null, { cellClasses: beforeClasses, dayLabels: w.dayLabels }) + "</div>" +
+          "<div><h4 style='font-size:12px; margin-bottom:4px; color:var(--primary);'>변경 후 시간표</h4>" +
+          buildTimetableHTML(w.after, null, { cellClasses: afterClasses, dayLabels: w.dayLabels }) + "</div>" +
+          "</div>";
+      });
+      area.innerHTML = html;
+    }
+
+    function closeTripSummaryModal() {
+      document.getElementById('tripSummaryModal').classList.remove('show');
+    }
+
+    function copyTripSummaryText() {
+      var data = buildTripSummaryData();
+      var c = data.counts;
+      var lines = [
+        "[출장 결보강 내역] " + tripState.teacher + "T / " + (tripState.reason || '') + " / " + tripState.startDate + " ~ " + tripState.endDate,
+        "총 " + c.total + "차시: 교체 " + c.swap + "건, 보강 " + c.sub + "건, 미배정 " + c.none + "건",
+        "",
+        "▪ 수업별 내역"
+      ];
+      data.rows.forEach(function(r, i) {
+        var change = r.type === '미배정' ? "미배정"
+          : r.type + ": " + r.slotB + " " + r.subjectB + " " + r.teacherB + "T" + (r.isNextWeek ? " (다음 주)" : "");
+        lines.push((i + 1) + ". " + r.slotA + " " + r.cls + " " + r.subject + " → " + change);
+      });
+      if (data.groups.length) {
+        lines.push("", "▪ 교사별 확인");
+        data.groups.forEach(function(g) {
+          lines.push(g.teacher + "T" + (g.isTripTeacher ? " (출장 교사)" : "") + " " + g.duties.length + "건");
+          g.duties.forEach(function(d) { lines.push("  - " + d.text); });
+        });
+      }
+      var text = lines.join("\n");
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function() {
+          alert("✅ 메신저용 텍스트가 복사되었습니다! (Ctrl+V로 붙여넣기)");
+        }).catch(function() {
+          prompt("아래 텍스트를 복사하세요:", text);
+        });
+      } else {
+        prompt("아래 텍스트를 복사하세요:", text);
+      }
     }
 
     function downloadTripHwpx() {
