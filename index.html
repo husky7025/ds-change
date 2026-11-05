@@ -976,6 +976,50 @@
       .confirmation-container { overflow: visible !important; }
       .app-nav { position: static !important; }
       .official-plan-sheet { padding-top: 15mm !important; } /* @page 여백이 0이라 위쪽 여백을 둔다 */
+
+      /* 계획서 외 화면 인쇄: 여백이 있는 별도 용지를 쓰고 화면 색을 유지한다 */
+      @page sheet { size: A4 portrait; margin: 12mm; }
+      body { display: block !important; min-height: 0 !important; }
+      #initialPlaceholder, #tripInitialPlaceholder { display: none !important; }
+      .no-print, .modal-close, .trip-bar-actions, #tripSummaryModalBody button { display: none !important; }
+      .tt-table th, .tt-table td, .compact-table th, .badge, .modal-card *, .trip-grid * {
+        -webkit-print-color-adjust: exact; print-color-adjust: exact;
+      }
+      .tt-wrap { overflow: visible !important; }
+      .tt-wrap, .tt-table tr, .compact-table tr { break-inside: avoid; }
+      .flex-tables-grid { grid-template-columns: 1fr 1fr !important; break-inside: avoid; }
+
+      #tripSummaryModalBody div[style*="border:1px solid"] { break-inside: avoid; }
+
+      /* 창이 열려 있으면 그 창만 인쇄 */
+      body:has(.modal-overlay.show) .dashboard-layout,
+      body:has(.modal-overlay.show) .trip-dashboard-layout { display: none !important; }
+      .modal-overlay.show {
+        display: block !important; position: static !important; page: sheet;
+        padding: 0 !important; background: none !important;
+      }
+      .modal-overlay.show .modal-card, .modal-overlay.show .help-modal-card {
+        display: block !important; width: 100% !important; max-width: none !important; max-height: none !important;
+        overflow: visible !important; box-shadow: none !important; padding: 0 !important;
+      }
+      .modal-overlay.show .help-modal-body { overflow: visible !important; }
+      .modal-overlay.show .help-modal-nav, .modal-overlay.show .help-modal-footer { display: none !important; }
+
+      /* 출장 화면 인쇄 */
+      body:has(#tabModeTrip.active):not(:has(.modal-overlay.show)) .dashboard-layout { display: none !important; }
+      body:has(#tabModeTrip.active):not(:has(.modal-overlay.show)) .trip-dashboard-layout {
+        display: block !important; page: sheet; max-width: none; margin: 0; padding: 0;
+      }
+      .trip-dashboard-layout > .card { display: none !important; }
+      .trip-grid { grid-template-columns: minmax(0, 1fr) !important; }
+      .trip-grid .table-box { display: block !important; overflow: visible !important; border: 0 !important; }
+      #tripLessonsTable { min-width: 0 !important; }
+      .trip-candidate-select { appearance: none; -webkit-appearance: none; border: 0 !important; padding: 0 !important; min-height: 0 !important; }
+
+      /* 계획서를 고르기 전에는 탐색 결과를 인쇄 */
+      body:has(#tabModeSingle.active):not(:has(.modal-overlay.show)):not(:has(#confirmationCard.show)) .right-panel { page: sheet; }
+      body:not(:has(#confirmationCard.show)) #resultSummaryBar:not([style*="display: none"]),
+      body:not(:has(#confirmationCard.show)) #resultTableArea:not([style*="display: none"]) { display: block !important; }
     }
 </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -1392,7 +1436,7 @@
     <div class="modal-card">
       <div class="modal-header">
         <h3 id="modalTitle">📊 내 전체 시간표</h3>
-        <button class="modal-close" onclick="closeTeacherModal()">✕</button>
+        <span style="display:flex; gap:8px; align-items:center;"><button type="button" class="btn btn-sm btn-white no-print" onclick="window.print()">🖨️ 인쇄</button><button class="modal-close" onclick="closeTeacherModal()">✕</button></span>
       </div>
       <div id="modalTimetableArea"></div>
     </div>
@@ -1406,7 +1450,8 @@
         <button class="modal-close" onclick="closeTripSummaryModal()">✕</button>
       </div>
       <div id="tripSummaryModalBody"></div>
-      <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; flex-wrap: wrap;">
+      <div class="no-print" style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; flex-wrap: wrap;">
+        <button class="btn btn-white" onclick="window.print()">🖨️ 인쇄</button>
         <button class="btn btn-success" onclick="copyTripSummaryText()">📋 메신저 복사</button>
         <button class="btn btn-white" onclick="closeTripSummaryModal()">닫기</button>
       </div>
@@ -1417,7 +1462,7 @@
     <div class="modal-card">
       <div class="modal-header">
         <h3 id="simModalTitle">🔄 교체/보강 변동 시간표 시뮬레이션 비교</h3>
-        <button class="modal-close" onclick="closeSimulationModal()">✕</button>
+        <span style="display:flex; gap:8px; align-items:center;"><button type="button" class="btn btn-sm btn-white no-print" onclick="window.print()">🖨️ 인쇄</button><button class="modal-close" onclick="closeSimulationModal()">✕</button></span>
       </div>
       <div id="simModalContent"></div>
     </div>
