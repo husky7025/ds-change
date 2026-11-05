@@ -158,6 +158,61 @@ function parseSheetValues(data) {
   return scheduleList;
 }
 
+/* =========================================================
+   수업이 없는 날 (공휴일·학사일정)
+   - 공휴일은 평일만 적고, 2027년 말까지 들어 있다
+   - 학사일정은 setSchoolCalendar로 더한다
+   ========================================================= */
+const PUBLIC_HOLIDAYS = {
+  "2026-12-25": "성탄절",
+  "2027-01-01": "신정",
+  "2027-02-08": "설날 연휴", "2027-02-09": "설날 대체공휴일",
+  "2027-03-01": "삼일절",
+  "2027-05-03": "노동절 대체공휴일", "2027-05-05": "어린이날", "2027-05-13": "부처님오신날",
+  "2027-07-19": "제헌절 대체공휴일",
+  "2027-08-16": "광복절 대체공휴일",
+  "2027-09-14": "추석 연휴", "2027-09-15": "추석", "2027-09-16": "추석 연휴",
+  "2027-10-04": "개천절 대체공휴일", "2027-10-11": "한글날 대체공휴일",
+  "2027-12-27": "성탄절 대체공휴일"
+};
+let schoolCalendarDates = {};
+
+function getBlockedReason(dateStr) {
+  return schoolCalendarDates[dateStr] || PUBLIC_HOLIDAYS[dateStr] || "";
+}
+
+function setSchoolCalendar(dates) {
+  schoolCalendarDates = dates || {};
+}
+
+function normalizeCalendarDate(text) {
+  const m = String(text || "").trim().match(/^(\d{4})\s*[-./년]\s*(\d{1,2})\s*[-./월]\s*(\d{1,2})/);
+  if (!m) return "";
+  return m[1] + "-" + m[2].padStart(2, "0") + "-" + m[3].padStart(2, "0");
+}
+
+/* 학사일정 CSV → { 날짜: 내용 }. 첫 칸이 "시작일"인 머리글이 없으면 null (학사일정 표가 아님) */
+function parseSchoolCalendar(csvText) {
+  const rows = parseCSV(csvText);
+  if (!rows.length || String(rows[0][0] || "").replace(/\s/g, "") !== "시작일") return null;
+  const dates = {};
+  rows.slice(1).forEach(function(r) {
+    const start = normalizeCalendarDate(r[0]);
+    if (!start) return;
+    const end = normalizeCalendarDate(r[1]) || start;
+    const title = String(r[2] || "").trim() || "학사일정";
+    const cur = new Date(start + "T00:00:00");
+    const last = new Date(end + "T00:00:00");
+    for (let i = 0; cur <= last && i < 366; i++) {
+      const key = cur.getFullYear() + "-" + String(cur.getMonth() + 1).padStart(2, "0") + "-" + String(cur.getDate()).padStart(2, "0");
+      const dow = cur.getDay();
+      if (dow >= 1 && dow <= 5) dates[key] = title;
+      cur.setDate(cur.getDate() + 1);
+    }
+  });
+  return dates;
+}
+
 /* 교사별/요일별/교시 인덱스: { 교사명: { 요일: { 교시: true } } } */
 function buildScheduleIndex(scheduleList) {
   const idx = {};
@@ -463,7 +518,7 @@ function getTripSwapCandidatesForLesson(scheduleIndex, scheduleList, lesson, tri
     const mm = String(cDate.getMonth() + 1).padStart(2, '0');
     const dd = String(cDate.getDate()).padStart(2, '0');
     const dStr = yyyy + '-' + mm + '-' + dd;
-    if (tripDateStrings.indexOf(dStr) === -1 && dStr >= todayStr) {
+    if (tripDateStrings.indexOf(dStr) === -1 && dStr >= todayStr && !getBlockedReason(dStr)) {
       candidateDates.push({
         date: dStr,
         day: dayNames[d],
@@ -484,7 +539,7 @@ function getTripSwapCandidatesForLesson(scheduleIndex, scheduleList, lesson, tri
       const mm = String(cDate.getMonth() + 1).padStart(2, '0');
       const dd = String(cDate.getDate()).padStart(2, '0');
       const dStr = yyyy + '-' + mm + '-' + dd;
-      if (tripDateStrings.indexOf(dStr) !== -1 || dStr < todayStr) continue; // 출장일과 지난 날짜는 제외
+      if (tripDateStrings.indexOf(dStr) !== -1 || dStr < todayStr || getBlockedReason(dStr)) continue; // 출장일·지난 날짜·수업 없는 날 제외
       candidateDates.push({
         date: dStr,
         day: dayNames[d],
@@ -808,5 +863,5 @@ function buildTripWeekComparison(scheduleList, tripLessons, assignments, teacher
 if (typeof module !== "undefined" && module.exports) {
   module.exports = { deduceSubjectCategory, buildTeacherSubjectMap, parseCSV, parseSheetValues, buildScheduleIndex, isTeacherFree, checkConsecutive,
     searchScheduleLocal, findCommonFreeTimeLocal, simulateSwapLocal, simulateSubstituteLocal,
-    getTeacherTimetableLocal, extractClassName, splitClassName, buildGridData, getTripLessonsForDates, analyzeClassContinuity, getTripCandidatesForLesson, autoAssignTripSubstitutes, getTripSwapCandidatesForLesson, buildTripWeekComparison };
+    getTeacherTimetableLocal, extractClassName, splitClassName, buildGridData, getTripLessonsForDates, analyzeClassContinuity, getTripCandidatesForLesson, autoAssignTripSubstitutes, getTripSwapCandidatesForLesson, buildTripWeekComparison, getBlockedReason, setSchoolCalendar, parseSchoolCalendar };
 }

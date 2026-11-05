@@ -961,6 +961,8 @@
     .room-name { font-size: 11px; color: var(--gray-500); }
 
     /* 휴대폰 */
+    .date-notice { margin-top: 6px; padding: 7px 10px; border-radius: var(--radius-sm); background: #fef3c7; color: #92400e; font-size: 13px; }
+
     @media (max-width: 640px) {
       .app-nav, .data-banner, .main-mode-tabs-container, .dashboard-layout, .trip-dashboard-layout { padding-left: 16px; padding-right: 16px; }
       .app-nav .badge-school { display: none; }
@@ -1130,6 +1132,7 @@
         <div class="form-group">
           <label>결강/교체 일자 (달력 선택시 요일 자동반영)</label>
           <input type="date" id="targetDate" onchange="onDateChanged(this.value)">
+          <div id="dateNotice" class="date-notice" hidden></div>
           <div class="day-tabs" id="dayTabs">
             <button class="day-tab active" onclick="selectDayTab('월', event)">월</button>
             <button class="day-tab" onclick="selectDayTab('화', event)">화</button>
@@ -1521,7 +1524,7 @@
     </div>
   </div>
 
-  <script src="engine.js?v=20261105_v6c"></script>
+  <script src="engine.js?v=20261105_v6d"></script>
   <script>
 /* ═══════════════════════════════════════════════════════════════
    데이터 레이어 (Google Sheets 실시간 연동 v2.0)
@@ -1587,7 +1590,8 @@ function updateDataBanner() {
     banner.className = 'data-banner ok';
     var srcText = GB.source === 'google_sheet' ? "📊 구글 스프레드시트 실시간 연동" : "📁 저장소 백업 시간표";
     var timeText = GB.syncTime ? " (" + GB.syncTime + " 동기화)" : "";
-    banner.innerHTML = "✅ <b>" + srcText + "</b> — 전체 교사 " + GB.allTeachers.length + "명 로드됨" + timeText +
+    var calendarText = GB.calendarDays ? " · 학사일정 " + GB.calendarDays + "일 제외" : "";
+    banner.innerHTML = "✅ <b>" + srcText + "</b> — 전체 교사 " + GB.allTeachers.length + "명 로드됨" + timeText + calendarText +
       " <button type='button' onclick='loadTimetableOnStart(true)' style='margin-left:10px;padding:2px 8px;font-size:11px;border-radius:4px;border:1px solid #10b981;background:#ffffff;cursor:pointer;color:#065f46;font-weight:700;'>🔄 실시간 동기화</button>" +
       " <a href='" + GOOGLE_SHEET_CONFIG.webUrl + "' target='_blank' rel='noopener' style='margin-left:6px;font-size:11px;color:#047857;text-decoration:underline;'>시트 열기 ↗</a>";
   }
@@ -1607,7 +1611,27 @@ function decodeCSVBuffer(buf) {
   return t;
 }
 
+function loadSchoolCalendar() {
+  var url = GOOGLE_SHEET_CONFIG.sheetId
+    ? "https://docs.google.com/spreadsheets/d/" + GOOGLE_SHEET_CONFIG.sheetId + "/gviz/tq?tqx=out:csv&sheet=" + encodeURIComponent("학사일정")
+    : "school-calendar.csv";
+  fetch(url + (url.indexOf("?") >= 0 ? "&" : "?") + "ts=" + Date.now()).then(function(r) {
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    return r.text();
+  }).then(function(text) {
+    var dates = parseSchoolCalendar(text);
+    if (!dates) return; // 학사일정 표가 아직 없으면 공휴일만 적용
+    setSchoolCalendar(dates);
+    GB.calendarDays = Object.keys(dates).length;
+    updateDataBanner();
+    updateDateNotice();
+  }).catch(function(err) {
+    console.warn("School calendar load failed:", err);
+  });
+}
+
 function loadTimetableOnStart(isManual) {
+  loadSchoolCalendar();
   var banner = document.getElementById('dataBanner');
   if (isManual && banner) {
     banner.style.display = 'block';
@@ -1714,8 +1738,17 @@ var dayMap = { 0: "일", 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "�
         .replace(/'/g, "&#39;");
     }
 
+    function updateDateNotice() {
+      var el = document.getElementById('dateNotice');
+      var dateVal = document.getElementById('targetDate').value;
+      var reason = dateVal ? getBlockedReason(dateVal) : "";
+      el.hidden = !reason;
+      el.textContent = reason ? "⚠️ 이 날은 " + reason + "입니다. 수업이 있는 날인지 확인해 주세요." : "";
+    }
+
     function onDateChanged(dateVal) {
       if (!dateVal) return;
+      updateDateNotice();
       var d = new Date(dateVal + 'T00:00:00');
       var dayKor = dayMap[d.getDay()];
 
@@ -1751,6 +1784,7 @@ var dayMap = { 0: "일", 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "�
         var mm = String(curDate.getMonth() + 1).padStart(2, '0');
         var dd = String(curDate.getDate()).padStart(2, '0');
         document.getElementById('targetDate').value = yyyy + '-' + mm + '-' + dd;
+        updateDateNotice();
       }
     }
 
@@ -1911,6 +1945,10 @@ var dayMap = { 0: "일", 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "�
       var tbody = document.getElementById('candidatesTbody');
       tbody.innerHTML = '';
       var totalCount = 0;
+
+      if (res.swapData) {
+        res.swapData = res.swapData.filter(function(item) { return !getBlockedReason(getDateForDay(targetDate, item.dayB)); });
+      }
 
       if (res.swapData && res.swapData.length > 0) {
         res.swapData.forEach(function(item) {
@@ -2656,6 +2694,7 @@ var dayMap = { 0: "일", 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "�
 
     function getSchoolDatesBetween(startDateStr, endDateStr) {
       var list = [];
+      list.skipped = [];
       var start = new Date(startDateStr + 'T00:00:00');
       var end = new Date(endDateStr + 'T00:00:00');
       var dayMap = { 1: "월", 2: "화", 3: "수", 4: "목", 5: "금" };
@@ -2669,11 +2708,14 @@ var dayMap = { 0: "일", 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "�
           var yyyy = cur.getFullYear();
           var mm = String(cur.getMonth() + 1).padStart(2, '0');
           var dd = String(cur.getDate()).padStart(2, '0');
-          list.push({
-            date: yyyy + '-' + mm + '-' + dd,
-            day: dayMap[dow],
-            shortDate: (cur.getMonth() + 1) + '/' + cur.getDate()
-          });
+          var dateKey = yyyy + '-' + mm + '-' + dd;
+          var shortDate = (cur.getMonth() + 1) + '/' + cur.getDate();
+          var blocked = getBlockedReason(dateKey);
+          if (blocked) {
+            list.skipped.push(shortDate + " " + blocked);
+          } else {
+            list.push({ date: dateKey, day: dayMap[dow], shortDate: shortDate });
+          }
         }
         cur.setDate(cur.getDate() + 1);
       }
@@ -2729,7 +2771,8 @@ var dayMap = { 0: "일", 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "�
         document.getElementById('tripResultArea').style.display = 'block';
 
         document.getElementById('tripSummaryPeriod').textContent =
-          "출장 기간: " + startDate + " ~ " + endDate + " (수업일 " + dateList.length + "일)";
+          "출장 기간: " + startDate + " ~ " + endDate + " (수업일 " + dateList.length + "일)" +
+          (dateList.skipped.length ? " · 제외: " + dateList.skipped.join(", ") : "");
         document.getElementById('tripSummaryTitle').textContent =
           "👤 " + teacher + " 선생님의 출장 수업 (총 " + lessons.length + "차시)";
 
@@ -3609,6 +3652,14 @@ var dayMap = { 0: "일", 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "�
             • 학급명은 반드시 <code>2-1</code>, <code>3-9</code>처럼 "학년-반" 형태로 기재해야 합니다.<br>
             • 엑셀에서 <code>3-9</code>가 날짜(3월 9일)로 자동 변환되는 것을 방지하기 위해 텍스트 서식으로 입력하세요. (시스템 내 자동 복원 기능도 내장되어 있습니다.)
           </div>
+                  <h3 style="font-size:14px; margin:14px 0 6px;">공휴일·학사일정 제외</h3>
+          <p>공휴일은 2027년 말까지 자동으로 제외됩니다. 시험·체험학습처럼 수업이 없는 날은 시간표 구글 시트에 <strong>학사일정</strong> 탭을 만들어 적습니다.</p>
+          <table class="help-table">
+            <tr><th>시작일</th><th>종료일</th><th>내용</th></tr>
+            <tr><td>2026-12-15</td><td>2026-12-18</td><td>2학기 기말고사</td></tr>
+            <tr><td>2026-12-24</td><td></td><td>재량휴업일</td></tr>
+          </table>
+          <p>첫 줄 머리글은 그대로 쓰고, 하루짜리는 종료일을 비워 둡니다. 저장 후 <strong>[🔄 시트 동기화]</strong>를 누르면 적용됩니다.</p>
         </section>
 
         <section id="help-sec-10" class="help-section">
