@@ -6,31 +6,34 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>수업(교체ㆍ보강) 계획서</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
   <style>
     /* ═══════════════════════════════
        기본 리셋 & 변수
     ═══════════════════════════════ */
     :root {
-      --primary: #4f6ef7;
-      --primary-dark: #3a56d4;
-      --primary-light: #eef1ff;
-      --success: #10b981;
-      --success-light: #ecfdf5;
-      --warning: #f59e0b;
-      --purple: #8b5cf6;
-      --gray-50: #f9fafb;
-      --gray-100: #f3f4f6;
-      --gray-200: #e5e7eb;
-      --gray-300: #d1d5db;
-      --gray-400: #9ca3af;
-      --gray-500: #6b7280;
-      --gray-600: #4b5563;
-      --gray-700: #374151;
-      --gray-800: #1f2937;
+      --bg: #f4f6f9;
+      --surface: #ffffff;
+      --primary: #1f4e9e;
+      --primary-dark: #173c7a;
+      --primary-light: #e9f0fb;
+      --success: #0e8a68;
+      --success-light: #e8f6f1;
+      --warning: #b7791f;
+      --purple: #1f4e9e;
+      --gray-50: #f8f9fb;
+      --gray-100: #f0f2f6;
+      --gray-200: #e2e6ed;
+      --gray-300: #cdd3dd;
+      --gray-400: #98a1b0;
+      --gray-500: #667085;
+      --gray-600: #4a5364;
+      --gray-700: #343c4b;
+      --gray-800: #1b2230;
       --radius-sm: 6px;
-      --radius-md: 10px;
-      --radius-lg: 14px;
-      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.08);
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -738,6 +741,242 @@
       color: var(--gray-500);
     }
 
+
+    /* ═══════════════════════════════════════════════════════════════
+       v6 화면 디자인
+       - 계획서 양식(.official-plan-sheet, .pdf-form-table, .approval-table)과
+         기존 인쇄 규칙은 이 블록에서 바꾸지 않는다
+    ═══════════════════════════════════════════════════════════════ */
+    body {
+      font-family: 'Pretendard Variable', Pretendard, 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+    }
+    button, input, select, textarea { font-family: inherit; }
+    :focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+
+    /* 상단 */
+    .app-nav {
+      position: sticky; top: 0; z-index: 50;
+      background: var(--surface); color: var(--gray-800);
+      padding: 10px max(20px, calc((100% - 1280px) / 2));
+      border-bottom: 1px solid var(--gray-200); box-shadow: none;
+      flex-wrap: wrap; gap: 8px;
+    }
+    .school-logo-img { box-shadow: none; padding: 0; width: 34px; height: 34px; }
+    .app-nav .logo-area:hover .school-logo-img { transform: none; }
+    .app-nav h1 { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; color: var(--gray-800); }
+    .app-nav .badge-school { background: none; color: var(--gray-500); font-size: 13px; padding: 0; }
+    .nav-actions { flex-wrap: wrap; }
+    .app-nav .btn-white { border-color: transparent; background: none; color: var(--gray-600); }
+    .app-nav .btn-white:hover { background: var(--gray-100); color: var(--gray-800); }
+
+    .data-banner {
+      width: 100%; max-width: 1320px; margin: 12px auto 0; padding: 7px 20px;
+      background: none !important; border: 0 !important;
+      font-size: 13px; text-align: left;
+    }
+    .data-banner.ok { color: var(--gray-500); }
+    .data-banner.warn { color: #92400e; }
+
+    /* 모드 전환 */
+    .main-mode-tabs-container { width: 100%; max-width: 1320px; margin: 8px auto 0; padding: 0 20px; }
+    .main-mode-tabs {
+      display: inline-flex; gap: 2px; padding: 3px; border: 0;
+      background: var(--gray-200); border-radius: var(--radius-md);
+      max-width: 100%;
+    }
+    .main-mode-tab {
+      font-size: 14px; font-weight: 600; color: var(--gray-600);
+      padding: 8px 18px; margin: 0; border: 0;
+      border-radius: var(--radius-sm); white-space: nowrap;
+    }
+    .main-mode-tab:hover { background: none; color: var(--gray-800); }
+    .main-mode-tab.active { background: var(--surface); color: var(--primary); box-shadow: var(--shadow-sm); border: 0; }
+
+    /* 레이아웃 */
+    .dashboard-layout {
+      max-width: 1320px; margin: 16px auto 32px; padding: 0 20px;
+      grid-template-columns: 380px minmax(0, 1fr); gap: 20px;
+    }
+    @media (max-width: 960px) { .dashboard-layout { grid-template-columns: minmax(0, 1fr); } }
+    .trip-dashboard-layout { width: 100%; max-width: 1320px; margin: 16px auto 32px; padding: 0 20px; }
+    .right-panel { gap: 16px; min-width: 0; }
+
+    /* 카드 */
+    .card {
+      padding: 18px; border-radius: var(--radius-lg);
+      border: 1px solid var(--gray-200); box-shadow: none; margin-bottom: 16px;
+    }
+    .card-title {
+      font-size: 15px; font-weight: 700; color: var(--gray-800);
+      margin-bottom: 14px; padding: 0; border: 0;
+    }
+    .card-title small { font-size: 12px; font-weight: 400; color: var(--gray-500); }
+
+    .fold { padding: 0; }
+    .fold > summary {
+      list-style: none; cursor: pointer; margin: 0; padding: 14px 18px;
+      border-radius: var(--radius-lg);
+    }
+    .fold > summary::-webkit-details-marker { display: none; }
+    .fold > summary::after { content: "▾"; color: var(--gray-400); font-size: 13px; transition: transform 0.15s; }
+    .fold[open] > summary::after { transform: rotate(180deg); }
+    .fold > summary:hover { background: var(--gray-50); }
+    .fold-body { padding: 4px 18px 18px; }
+
+    /* 입력 */
+    label { font-size: 13px; font-weight: 600; color: var(--gray-600); letter-spacing: 0; margin-bottom: 5px; }
+    .form-group { margin-bottom: 14px; }
+    .input-row { gap: 10px; }
+    input[type="text"], input[type="date"], select {
+      min-height: 40px; padding: 8px 11px;
+      font-size: 14px; background: var(--surface);
+      border: 1px solid var(--gray-300); border-radius: var(--radius-md);
+    }
+    input:focus, select:focus { box-shadow: 0 0 0 3px var(--primary-light); }
+
+    .day-tabs, .period-grid { gap: 4px; margin-top: 6px; }
+    .day-tab, .period-btn {
+      min-height: 36px; font-size: 14px; font-weight: 600;
+      border: 1px solid var(--gray-300); border-radius: var(--radius-sm);
+      background: var(--surface); color: var(--gray-700);
+    }
+    .day-tab:hover, .period-btn:hover { background: var(--gray-100); }
+    .day-tab.active, .period-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+    .mode-btn {
+      min-height: 40px; margin: 0; font-size: 14px; font-weight: 600;
+      background: var(--surface); color: var(--gray-600);
+      border: 1px solid var(--gray-300); border-radius: var(--radius-md);
+    }
+    .mode-btn.checked { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
+
+    /* 버튼: 영역마다 주요 버튼 하나만 채운 색으로 둔다 */
+    .btn { min-height: 38px; padding: 8px 14px; font-size: 14px; font-weight: 600; border-radius: var(--radius-md); }
+    .btn:active { transform: none; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-white, .btn-purple, .btn-warning {
+      background: var(--surface); color: var(--gray-700); border: 1px solid var(--gray-300);
+    }
+    .btn-white:hover, .btn-purple:hover, .btn-warning:hover { background: var(--gray-100); }
+    .btn-success { background: var(--success); }
+    .btn-success:hover { background: #0b7a5b; }
+    .btn-sm { min-height: 30px; padding: 5px 10px; font-size: 12.5px; border-radius: var(--radius-sm); }
+    .btn-block { min-height: 46px; font-size: 15px; font-weight: 700; }
+
+    /* 결과 */
+    .placeholder-box {
+      padding: 72px 24px; background: none;
+      border: 1px dashed var(--gray-300); color: var(--gray-500);
+    }
+    .placeholder-box .icon { font-size: 30px; }
+    .placeholder-box p { line-height: 1.7; }
+
+    .result-summary-bar {
+      gap: 12px; flex-wrap: wrap; padding: 14px 18px;
+      border: 1px solid var(--gray-200); border-left: 1px solid var(--gray-200); box-shadow: none;
+    }
+    .table-box { overflow-x: auto; box-shadow: none; }
+    .compact-table { font-size: 14px; }
+    .compact-table th {
+      padding: 10px 12px; font-size: 12.5px; font-weight: 600;
+      background: var(--gray-50); color: var(--gray-500);
+      border-bottom: 1px solid var(--gray-200); white-space: nowrap;
+    }
+    .compact-table td { padding: 11px 12px; }
+    .compact-table tr:hover td { background: var(--gray-50); }
+    .compact-table tr.selected td { background: var(--primary-light); }
+    #candidatesTable td:nth-child(1), #candidatesTable td:nth-child(3) { white-space: nowrap; }
+
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-weight: 600; }
+    .badge-same-subject, .badge-other-subject { font-size: 12px; border-radius: 999px; padding: 1px 8px; font-weight: 600; }
+    .badge-purple, .badge-gold, .badge-gray, .badge-danger { font-size: 11px; border-radius: 999px; padding: 2px 8px; }
+    .badge-purple { background: var(--primary-light); color: var(--primary); }
+    .badge-gold { background: #fef3c7; color: #92400e; }
+    .badge-gray { background: var(--gray-100); color: var(--gray-600); }
+    .badge-free-time { border-radius: 999px; }
+
+    .diff-summary-card { border: 1px solid var(--gray-200); box-shadow: none; padding: 16px 18px; }
+    .diff-head { font-size: 15px; font-weight: 700; color: var(--gray-800); display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .diff-head-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+    .diff-teacher-box { background: var(--gray-50); border: 0; }
+    .diff-teacher-box .t-name { font-size: 14px; font-weight: 700; }
+    .diff-teacher-box .t-detail { font-size: 13px; color: var(--gray-600); }
+    .diff-arrow { color: var(--gray-400); }
+    @media (max-width: 560px) {
+      .diff-grid { grid-template-columns: minmax(0, 1fr); }
+      .diff-arrow { transform: rotate(90deg); }
+    }
+
+    .confirmation-container { padding: 18px; box-shadow: none; overflow-x: auto; }
+    .doc-top-bar { border-bottom: 1px solid var(--gray-200); }
+    .doc-top-title { font-size: 15px; font-weight: 700; color: var(--gray-800); }
+    .doc-top-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    /* 출장 모드 */
+    .trip-form {
+      display: grid; gap: 12px; align-items: end;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    }
+    .trip-form .trip-check {
+      display: flex; align-items: center; gap: 6px; min-height: 40px; margin: 0;
+      cursor: pointer; user-select: none;
+    }
+    .trip-form .trip-check input { width: 16px; height: 16px; accent-color: var(--primary); }
+    .trip-form .btn { width: 100%; min-height: 40px; }
+    .trip-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 12px; margin-bottom: 16px; padding: 14px 18px;
+      background: var(--surface); border: 1px solid var(--gray-200); border-radius: var(--radius-lg);
+    }
+    .trip-bar-period { font-size: 13px; color: var(--gray-500); }
+    .trip-bar-title { font-size: 16px; font-weight: 700; color: var(--gray-800); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .trip-bar-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .trip-grid { display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(260px, 1fr); gap: 16px; align-items: start; }
+    @media (max-width: 1100px) { .trip-grid { grid-template-columns: minmax(0, 1fr); } }
+    #tripLessonsTable { min-width: 720px; }
+    .trip-candidate-select { min-height: 36px; font-size: 13px; font-weight: 500; border: 1px solid var(--gray-300); }
+    .trip-note { margin: 4px 0 12px; font-size: 13px; color: var(--gray-500); line-height: 1.5; }
+    .trip-principles { margin: 0; padding-left: 16px; font-size: 13px; color: var(--gray-600); line-height: 1.7; }
+    .workload-item { font-size: 13px; }
+
+    /* 모달 */
+    .modal-overlay { background: rgba(16, 24, 40, 0.45); }
+    .modal-card { padding: 22px; border-radius: var(--radius-lg); box-shadow: 0 12px 32px rgba(16, 24, 40, 0.2); }
+    .modal-header h3 { font-size: 17px; font-weight: 700; }
+    .easter-egg-card { border: 0; }
+    .help-modal-card { border-radius: var(--radius-lg); }
+    .help-modal-header { background: var(--primary); }
+    .help-step-badge { background: var(--primary); }
+    .help-modal-body h2 { color: var(--primary-dark); }
+
+    /* 시간표 */
+    .tt-wrap { border: 1px solid var(--gray-200); border-radius: var(--radius-md); }
+    .tt-table { font-size: 12px; }
+    .tt-table th { background: var(--gray-100); color: var(--gray-600); font-weight: 600; padding: 6px 2px; }
+    .tt-table td { height: 42px; }
+    .tt-table td:first-child { background: var(--gray-50); color: var(--gray-500); }
+    .subj-name { font-size: 12px; font-weight: 600; }
+    .room-name { font-size: 11px; color: var(--gray-500); }
+
+    /* 휴대폰 */
+    @media (max-width: 640px) {
+      .app-nav, .data-banner, .main-mode-tabs-container, .dashboard-layout, .trip-dashboard-layout { padding-left: 16px; padding-right: 16px; }
+      .app-nav .badge-school { display: none; }
+      .main-mode-tabs { display: flex; }
+      .main-mode-tab { flex: 1; justify-content: center; padding: 8px 6px; font-size: 13px; }
+      .trip-bar-actions .btn { flex: 1 1 100%; }
+      .modal-overlay { padding: 8px; }
+      .modal-card { padding: 16px; }
+    }
+
+    @media print {
+      .main-mode-tabs-container, .data-banner, .trip-dashboard-layout { display: none !important; }
+      .confirmation-container { overflow: visible !important; }
+      .app-nav { position: static !important; }
+      .official-plan-sheet { padding-top: 15mm !important; } /* @page 여백이 0이라 위쪽 여백을 둔다 */
+    }
 </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
@@ -765,10 +1004,10 @@
   <div class="main-mode-tabs-container">
     <div class="main-mode-tabs">
       <button class="main-mode-tab active" id="tabModeSingle" onclick="switchMainMode('single')">
-        🔍 단일 차시 탐색
+        단일 차시 탐색
       </button>
       <button class="main-mode-tab" id="tabModeTrip" onclick="switchMainMode('trip')">
-        ✈️ 출장·연가 패키지 모드 <span class="badge-new">NEW</span>
+        출장·연가 패키지 모드
       </button>
     </div>
   </div>
@@ -781,8 +1020,8 @@
       <!-- 1) 1:1 결보강 탐색 카드 -->
       <div class="card">
         <div class="card-title">
-          <span>🔍 탐색 조건 설정</span>
-          <button class="btn btn-sm btn-purple" onclick="openTeacherModal()">📊 내 시간표</button>
+          <span>탐색 조건</span>
+          <button class="btn btn-sm btn-white" onclick="openTeacherModal()">📊 내 시간표</button>
         </div>
 
         <div class="input-row form-group">
@@ -861,16 +1100,14 @@
         </div>
 
         <button class="btn btn-primary btn-block" onclick="searchSchedule()" style="margin-top:10px;">
-          🔍 실시간 시간표 탐색
+          실시간 시간표 탐색
         </button>
       </div>
 
       <!-- 2) 계획서 항목 수동 수정 카드 -->
-      <div class="card" style="border-top: 3px solid var(--success);">
-        <div class="card-title" style="color: var(--success);">
-          <span>✏️ 계획서 항목 수동 수정</span>
-          <span style="font-size:10px; color:var(--gray-400);">실시간 계획서 반영</span>
-        </div>
+      <details class="card fold">
+        <summary class="card-title"><span>계획서 항목 수동 수정 <small>입력하면 바로 반영</small></span></summary>
+        <div class="fold-body">
         <div class="input-row form-group">
           <div>
             <label>교 과</label>
@@ -911,21 +1148,22 @@
             <input type="text" id="formTeacherB" list="teacherDatalist" placeholder="예: 맹준섭" oninput="onManualFormInput()">
           </div>
         </div>
-      </div>
+        </div>
+      </details>
 
       <!-- 3) 긴급 회의 (공동 공강) 카드 -->
-      <div class="card" style="border-top: 3px solid var(--purple);">
-        <div class="card-title" style="color: var(--purple);">
-          <span>👥 긴급 회의 (공동 공강) 탐색</span>
-        </div>
+      <details class="card fold">
+        <summary class="card-title"><span>긴급 회의 (공동 공강) 탐색</span></summary>
+        <div class="fold-body">
         <div class="form-group">
           <label>회의 참석 교사목록 (쉼표 구분)</label>
           <input type="text" id="meetingTeachers" placeholder="예: 유재, 홍길, 김철">
         </div>
-        <button class="btn btn-purple btn-block" onclick="findCommonFreeTime()" style="margin-top:6px;">
-          ⚡ 공동 공강시간 찾아내기
+        <button class="btn btn-primary btn-block" onclick="findCommonFreeTime()" style="margin-top:6px;">
+          공동 공강시간 찾기
         </button>
-      </div>
+        </div>
+      </details>
 
     </div>
 
@@ -934,7 +1172,7 @@
 
       <div id="initialPlaceholder" class="placeholder-box">
         <div class="icon">🧭</div>
-        <p>좌측에서 기준 교사, 날짜, 교시를 지정한 후 <b>[🔍 실시간 시간표 탐색]</b>을 누르시거나,<br>참석 교사를 입력 후 <b>[⚡ 공동 공강시간 찾아내기]</b>를 누르세요.</p>
+        <p>좌측에서 기준 교사, 날짜, 교시를 지정한 후 <b>[실시간 시간표 탐색]</b>을 누르시거나,<br>참석 교사를 입력 후 <b>[공동 공강시간 찾기]</b>를 누르세요.</p>
       </div>
 
       <div id="resultSummaryBar" class="result-summary-bar" style="display:none;">
@@ -962,9 +1200,9 @@
 
       <!-- 한눈에 보는 변경 요약 (Diff Banner) -->
       <div id="diffCard" class="diff-summary-card">
-        <div style="font-size:12px; font-weight:800; color:var(--primary); display:flex; justify-content:space-between; align-items:center;">
-          <span>⚡ 수업 변경 직관 요약</span>
-          <div style="display:flex; gap:6px; align-items:center;">
+        <div class="diff-head">
+          <span>수업 변경 요약</span>
+          <div class="diff-head-actions">
             <button class="btn btn-sm btn-purple" id="btnSimulateModal" onclick="openSimulationModal()">🔍 변동 시간표 시뮬레이션 비교</button>
             <span id="diffTypeBadge" style="background:#e0e7ff; color:#3730a3; padding:1px 6px; border-radius:4px; font-size:11px;">-</span>
           </div>
@@ -985,10 +1223,10 @@
       <!-- 최종 확인원 양식 -->
       <div id="confirmationCard" class="confirmation-container">
         <div class="doc-top-bar">
-          <div style="font-size:13px; font-weight:800; color:var(--gray-700);">
-            📄 수업 (교체ㆍ보강) 계획서 미리보기
+          <div class="doc-top-title">
+            수업(교체ㆍ보강) 계획서 미리보기
           </div>
-          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <div class="doc-top-actions">
             <button class="btn btn-sm btn-purple" onclick="copyFormText()">📋 메신저 복사</button>
             <button class="btn btn-sm btn-warning" onclick="printDoc()">🖨️ 계획서 인쇄(PDF)</button>
             <button class="btn btn-sm btn-primary" id="btnDownloadHwpx" onclick="downloadHwpx()">📥 HWPX 다운로드</button>
@@ -1006,26 +1244,26 @@
   <div id="tripDashboardLayout" class="trip-dashboard-layout" style="display:none;">
 
     <!-- 1) 출장 조건 설정 카드 -->
-    <div class="card" style="border-top: 3px solid var(--primary); margin-bottom: 16px;">
+    <div class="card">
       <div class="card-title">
-        <span>✈️ 출장·연가 일괄 결보강 탐색 설정</span>
-        <span style="font-size: 11px; color: var(--gray-500);">3일 이상 다차시 결강을 한 번에 배정합니다</span>
+        <span>출장·연가 일괄 탐색</span>
+        <small>여러 날의 수업을 한 번에 배정합니다</small>
       </div>
-      <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end;">
-        <div style="flex: 1; min-width: 130px;">
-          <label style="font-size: 12px; font-weight: 700; color: var(--gray-700); margin-bottom: 4px; display: block;">출장(결강) 교사</label>
+      <div class="trip-form">
+        <div>
+          <label>출장(결강) 교사</label>
           <input type="text" id="tripTeacher" list="teacherDatalist" placeholder="예: 유재" style="width: 100%;">
         </div>
-        <div style="flex: 1; min-width: 140px;">
-          <label style="font-size: 12px; font-weight: 700; color: var(--gray-700); margin-bottom: 4px; display: block;">출장 시작일</label>
+        <div>
+          <label>출장 시작일</label>
           <input type="date" id="tripStartDate" onchange="onTripStartDateChange(this.value)" style="width: 100%;">
         </div>
-        <div style="flex: 1; min-width: 140px;">
-          <label style="font-size: 12px; font-weight: 700; color: var(--gray-700); margin-bottom: 4px; display: block;">출장 종료일</label>
+        <div>
+          <label>출장 종료일</label>
           <input type="date" id="tripEndDate" style="width: 100%;">
         </div>
-        <div style="flex: 1; min-width: 140px;">
-          <label style="font-size: 12px; font-weight: 700; color: var(--gray-700); margin-bottom: 4px; display: block;">결강 사유</label>
+        <div>
+          <label>결강 사유</label>
           <select id="tripReason" style="width: 100%;">
             <option value="출장으로 인한 수업교체 및 보강" selected>출장</option>
             <option value="연가로 인한 수업교체 및 보강">연가</option>
@@ -1035,8 +1273,8 @@
             <option value="수업 교체 및 보강 처리">기타</option>
           </select>
         </div>
-        <div style="width: 110px;">
-          <label style="font-size: 12px; font-weight: 700; color: var(--gray-700); margin-bottom: 4px; display: block;">연속수업 제한</label>
+        <div>
+          <label>연속수업 제한</label>
           <select id="tripConsecutiveLimit" style="width: 100%;">
             <option value="0">제한 없음</option>
             <option value="2">2연속 제외</option>
@@ -1044,23 +1282,23 @@
             <option value="4">4연속 제외</option>
           </select>
         </div>
-        <div style="flex: 1; min-width: 190px;">
-          <label style="font-size: 12px; font-weight: 700; color: var(--gray-700); margin-bottom: 4px; display: block;">배정 정책 (1순위 교체 권장)</label>
+        <div>
+          <label>배정 정책 (1순위 교체 권장)</label>
           <select id="tripPolicy" style="width: 100%;">
             <option value="swap_first" selected>🔄 1순위 수업교체 우선 (교체 불가 시 보강)</option>
             <option value="swap_only">🔄 수업교체만 탐색 (All 교체)</option>
             <option value="sub_only">📋 보강만 탐색 (All 보강)</option>
           </select>
         </div>
-        <div style="display: flex; align-items: center; padding-bottom: 8px;">
-          <label style="font-size: 12px; font-weight: 600; color: var(--gray-700); cursor: pointer; display: flex; align-items: center; gap: 4px; user-select: none;">
-            <input type="checkbox" id="tripAllowNextWeek" checked style="cursor: pointer; width: 15px; height: 15px;">
+        <div>
+          <label class="trip-check">
+            <input type="checkbox" id="tripAllowNextWeek" checked>
             <span>다음 주 교체 허용</span>
           </label>
         </div>
         <div>
-          <button class="btn btn-primary" onclick="loadTripLessons()" style="height: 38px; padding: 0 18px;">
-            🔍 출장 수업 불러오기
+          <button class="btn btn-primary" onclick="loadTripLessons()">
+            출장 수업 불러오기
           </button>
         </div>
       </div>
@@ -1069,22 +1307,22 @@
     <!-- 2) 결과 영역: 수업 목록 및 자동 배정 -->
     <div id="tripResultArea" style="display:none;">
       <!-- 액션 & 통계 요약 바 -->
-      <div style="background: white; border-radius: var(--radius-lg); border: 1px solid var(--gray-200); padding: 14px 18px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: var(--shadow-sm);">
+      <div class="trip-bar">
         <div>
-          <div style="font-size: 12px; color: var(--gray-500); font-weight: 600;" id="tripSummaryPeriod">-</div>
-          <div style="font-size: 16px; font-weight: 800; color: var(--gray-800); display: flex; align-items: center; gap: 8px;">
+          <div class="trip-bar-period" id="tripSummaryPeriod">-</div>
+          <div class="trip-bar-title">
             <span id="tripSummaryTitle">-</span>
             <span class="badge" id="tripProgressBadge" style="background: #e0e7ff; color: #4338ca; font-size: 12px;">0 / 0 배정 완료</span>
           </div>
         </div>
-        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <button class="btn btn-purple" onclick="runTripAutoAssign()" title="동일교과, 학급 전담, 부하 분산을 종합 계산하여 자동 배정합니다">
-            ⚡ 원클릭 최적 자동 배정
+        <div class="trip-bar-actions">
+          <button class="btn btn-primary" onclick="runTripAutoAssign()" title="동일교과, 학급 전담, 부하 분산을 종합 계산하여 자동 배정합니다">
+            원클릭 최적 자동 배정
           </button>
           <button class="btn btn-white" onclick="resetTripAssignments()">
             🔄 배정 초기화
           </button>
-          <button class="btn btn-success" id="btnDownloadTripHwpx" onclick="downloadTripHwpx()">
+          <button class="btn btn-white" id="btnDownloadTripHwpx" onclick="downloadTripHwpx()">
             📄 출장 결보강 계획서 다운로드 (HWPX)
           </button>
           <button class="btn btn-white" id="btnTripSummary" onclick="openTripSummaryModal()">
@@ -1094,7 +1332,7 @@
       </div>
 
       <!-- 2열 레이아웃: 좌측 수업별 배정 테이블 / 우측 부하 분산 현황판 -->
-      <div style="display: grid; grid-template-columns: 2.2fr 1fr; gap: 16px;">
+      <div class="trip-grid">
         <!-- 좌측: 차시별 배정 카드/테이블 -->
         <div class="table-box" style="padding: 0;">
           <table class="compact-table" id="tripLessonsTable">
@@ -1112,11 +1350,11 @@
 
         <!-- 우측: 부하 분산 & 통계 패널 -->
         <div>
-          <div class="card" style="border-top: 3px solid var(--purple); margin-bottom: 14px;">
-            <div class="card-title" style="color: var(--purple);">
-              <span>📊 교사별 보강 배정 부하 현황</span>
+          <div class="card">
+            <div class="card-title">
+              <span>교사별 보강 배정 현황</span>
             </div>
-            <p style="font-size: 11px; color: var(--gray-500); margin-bottom: 10px;">
+            <p class="trip-note">
               특정 교사에게 보강이 편중되지 않도록 분산 상태를 실시간 확인합니다.
             </p>
             <div id="tripWorkloadStats" style="display: flex; flex-direction: column; gap: 6px; max-height: 400px; overflow-y: auto;">
@@ -1126,11 +1364,11 @@
             </div>
           </div>
 
-          <div class="card" style="background: #f8fafc; border: 1px dashed var(--gray-300);">
-            <div style="font-size: 12px; font-weight: 700; color: var(--gray-700); margin-bottom: 6px;">
-              💡 출장 모드 스마트 배정 원칙
+          <div class="card">
+            <div class="card-title">
+              자동 배정 원칙
             </div>
-            <ul style="font-size: 11px; color: var(--gray-600); line-height: 1.6; margin: 0; padding-left: 16px;">
+            <ul class="trip-principles">
               <li><b>★동일교과 우선:</b> 진도 손실 방지를 위해 동일 교과 교사 우선 배치</li>
               <li><b>👑같은 반 전담 우선:</b> 한 학급에 3일간 동일 교사가 들어가도록 묶음 배정</li>
               <li><b>부하 균등 분산:</b> 이미 배정된 교사는 감점하여 전체 교사에게 고루 배정</li>
@@ -1144,7 +1382,7 @@
     <!-- 초기 안내 Placeholder -->
     <div id="tripInitialPlaceholder" class="placeholder-box" style="margin-top: 20px;">
       <div class="icon">✈️</div>
-      <p>상단에서 <b>출장 교사, 시작일, 기간(예: 3일)</b>을 선택하고<br><b>[🔍 출장 수업 불러오기]</b>를 클릭하세요.<br>기간 내 모든 수업을 한 화면에서 원클릭으로 자동 배정하고 HWPX 대장으로 출력합니다.</p>
+      <p>상단에서 <b>출장 교사, 시작일, 기간(예: 3일)</b>을 선택하고<br><b>[출장 수업 불러오기]</b>를 클릭하세요.<br>기간 내 모든 수업을 한 화면에서 원클릭으로 자동 배정하고 HWPX 대장으로 출력합니다.</p>
     </div>
 
   </div>
@@ -1600,7 +1838,7 @@ var dayMap = { 0: "일", 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "�
             { html: escapeHtml(teacherBName + " 선생님") + catBadge },
             { text: dateB + " (" + item.dayB + ") " + item.periodB + "교시" },
             { text: classB }
-          ], '선택', 'btn btn-warning btn-sm', function(btn) {
+          ], '선택', 'btn btn-white btn-sm', function(btn) {
             selectSwapCandidate(
               tTeacher, tDay, tPeriod,
               teacherBName, item.dayB, item.periodB,
@@ -1614,14 +1852,14 @@ var dayMap = { 0: "일", 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "�
           totalCount++;
           var subTeacher = item.teacher || item.teacherB;
           var catBadge = item.isSameSubject
-            ? " <span class='badge' style='background:#7c3aed; color:white; font-size:10px;'>★동일교과(" + escapeHtml(item.category || '') + ")</span>"
+            ? " <span class='badge' style='background:var(--primary-light); color:var(--primary); font-size:11px;'>★동일교과(" + escapeHtml(item.category || '') + ")</span>"
             : (item.category ? " <span class='badge' style='background:var(--gray-200); color:var(--gray-700); font-size:10px;'>" + escapeHtml(item.category) + "</span>" : "");
           appendCandidateRow(tbody, [
             { html: "<span style='color:var(--success); font-weight:700;'>📋 보강</span>" },
             { html: escapeHtml(subTeacher + " 선생님") + catBadge },
             { text: targetDate + " (" + tDay + ") " + tPeriod + "교시" },
             { text: "공강 배정 가능" }
-          ], '선택', 'btn btn-success btn-sm', function(btn) {
+          ], '선택', 'btn btn-white btn-sm', function(btn) {
             selectSubCandidate(
               tTeacher, subTeacher, tDay,
               tPeriod, tClassName, targetDate, btn);
@@ -2998,7 +3236,7 @@ var dayMap = { 0: "일", 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "�
 
       function stat(label, value, color) {
         return "<div style='flex:1; min-width:90px; padding:8px 12px; border-radius:8px; background:var(--gray-100); text-align:center;'>" +
-          "<div style='font-size:11px; color:var(--gray-500); font-weight:600;'>" + label + "</div>" +
+          "<div style='font-size:12px; color:var(--gray-500); font-weight:600;'>" + label + "</div>" +
           "<div style='font-size:18px; font-weight:800; color:" + color + ";'>" + value + "</div></div>";
       }
 
@@ -3017,7 +3255,7 @@ var dayMap = { 0: "일", 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "�
           "⚠️ 아직 배정되지 않은 수업이 " + c.none + "건 있습니다.</div>";
       }
 
-      html += "<div style='font-size:13px; font-weight:800; margin-bottom:6px;'>수업별 내역</div>" +
+      html += "<div style='font-size:15px; font-weight:700; margin-bottom:8px;'>수업별 내역</div>" +
         "<div style='overflow-x:auto; margin-bottom:16px;'><table class='compact-table' style='width:100%;'>" +
         "<thead><tr><th>원래 수업</th><th>반 · 과목</th><th>구분</th><th>바뀐 수업</th><th>담당 교사</th></tr></thead><tbody>";
 
@@ -3025,7 +3263,7 @@ var dayMap = { 0: "일", 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "�
         var color = r.type === '교체' ? '#4338ca' : (r.type === '보강' ? '#15803d' : '#dc2626');
         var bg = r.type === '교체' ? '#e0e7ff' : (r.type === '보강' ? '#dcfce7' : '#fee2e2');
         var after = r.slotB ? escapeHtml(r.slotB + " " + r.subjectB) : "-";
-        if (r.isNextWeek) after += " <span style='font-size:10px; color:#b45309; font-weight:700;'>다음 주</span>";
+        if (r.isNextWeek) after += " <span style='font-size:12px; color:#b45309; font-weight:600;'>다음 주</span>";
         html += "<tr><td>" + escapeHtml(r.slotA) + "</td>" +
           "<td>" + escapeHtml(r.cls + " " + r.subject) + "</td>" +
           "<td><span class='badge' style='background:" + bg + "; color:" + color + "; font-size:11px;'>" + r.type + "</span></td>" +
@@ -3035,7 +3273,7 @@ var dayMap = { 0: "일", 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "�
       html += "</tbody></table></div>";
 
       if (data.groups.length) {
-        html += "<div style='font-size:13px; font-weight:800; margin-bottom:6px;'>교사별 확인</div>" +
+        html += "<div style='font-size:15px; font-weight:700; margin-bottom:8px;'>교사별 확인</div>" +
           "<div style='display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:8px;'>";
         data.groups.forEach(function(g, i) {
           html += "<div style='border:1px solid var(--gray-200); border-radius:8px; padding:8px 10px;'>" +
@@ -3044,7 +3282,7 @@ var dayMap = { 0: "일", 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "�
             " · " + g.duties.length + "건</div>";
           html += "<button type='button' class='btn btn-white btn-sm' style='margin:0 0 6px;' onclick='showTripCompare(" + i + ")'>🔍 시간표 비교</button>";
           g.duties.forEach(function(d) {
-            html += "<div style='font-size:11px; color:var(--gray-700); line-height:1.6;'>" + escapeHtml(d.text) + "</div>";
+            html += "<div style='font-size:12.5px; color:var(--gray-700); line-height:1.6;'>" + escapeHtml(d.text) + "</div>";
           });
           html += "</div>";
         });
@@ -3054,7 +3292,7 @@ var dayMap = { 0: "일", 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "�
       if (data.groups.length) {
         html += "<div id='tripCompareSection' style='margin-top:16px;'>" +
           "<div style='display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:6px;'>" +
-          "<div style='font-size:13px; font-weight:800;'>전후 시간표 비교</div>" +
+          "<div style='font-size:15px; font-weight:700;'>전후 시간표 비교</div>" +
           "<select id='tripCompareTeacher' onchange='renderTripCompare()' style='width:auto; min-width:140px;'>";
         data.groups.forEach(function(g, i) {
           html += "<option value='" + i + "'>" + escapeHtml(g.teacher) + "T" + (g.isTripTeacher ? " (출장 교사)" : "") + "</option>";
