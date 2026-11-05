@@ -1524,7 +1524,7 @@
     </div>
   </div>
 
-  <script src="engine.js?v=20261105_v6d"></script>
+  <script src="engine.js?v=20261105_v6e"></script>
   <script>
 /* ═══════════════════════════════════════════════════════════════
    데이터 레이어 (Google Sheets 실시간 연동 v2.0)
@@ -1590,7 +1590,7 @@ function updateDataBanner() {
     banner.className = 'data-banner ok';
     var srcText = GB.source === 'google_sheet' ? "📊 구글 스프레드시트 실시간 연동" : "📁 저장소 백업 시간표";
     var timeText = GB.syncTime ? " (" + GB.syncTime + " 동기화)" : "";
-    var calendarText = GB.calendarDays ? " · 학사일정 " + GB.calendarDays + "일 제외" : "";
+    var calendarText = (GB.neisUpdated ? " · 나이스 학사일정 적용" : "") + (GB.calendarDays ? " · 추가 일정 " + GB.calendarDays + "일" : "");
     banner.innerHTML = "✅ <b>" + srcText + "</b> — 전체 교사 " + GB.allTeachers.length + "명 로드됨" + timeText + calendarText +
       " <button type='button' onclick='loadTimetableOnStart(true)' style='margin-left:10px;padding:2px 8px;font-size:11px;border-radius:4px;border:1px solid #10b981;background:#ffffff;cursor:pointer;color:#065f46;font-weight:700;'>🔄 실시간 동기화</button>" +
       " <a href='" + GOOGLE_SHEET_CONFIG.webUrl + "' target='_blank' rel='noopener' style='margin-left:6px;font-size:11px;color:#047857;text-decoration:underline;'>시트 열기 ↗</a>";
@@ -1611,7 +1611,24 @@ function decodeCSVBuffer(buf) {
   return t;
 }
 
+/* 수업 없는 날: 나이스 자동 일정 + 학교가 직접 적은 일정 */
 function loadSchoolCalendar() {
+  function afterLoad() {
+    updateDataBanner();
+    updateDateNotice();
+  }
+
+  fetch("neis-calendar.json?ts=" + Date.now()).then(function(r) {
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    return r.json();
+  }).then(function(data) {
+    setNeisCalendar(data.dates);
+    GB.neisUpdated = data.updated || "";
+    afterLoad();
+  }).catch(function(err) {
+    console.warn("NEIS calendar load failed:", err);
+  });
+
   var url = GOOGLE_SHEET_CONFIG.sheetId
     ? "https://docs.google.com/spreadsheets/d/" + GOOGLE_SHEET_CONFIG.sheetId + "/gviz/tq?tqx=out:csv&sheet=" + encodeURIComponent("학사일정")
     : "school-calendar.csv";
@@ -1620,11 +1637,10 @@ function loadSchoolCalendar() {
     return r.text();
   }).then(function(text) {
     var dates = parseSchoolCalendar(text);
-    if (!dates) return; // 학사일정 표가 아직 없으면 공휴일만 적용
+    if (!dates) return; // 직접 적은 일정이 없으면 나이스·공휴일만 적용
     setSchoolCalendar(dates);
     GB.calendarDays = Object.keys(dates).length;
-    updateDataBanner();
-    updateDateNotice();
+    afterLoad();
   }).catch(function(err) {
     console.warn("School calendar load failed:", err);
   });
@@ -1946,8 +1962,13 @@ var dayMap = { 0: "일", 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "�
       tbody.innerHTML = '';
       var totalCount = 0;
 
+      var targetGrade = gradeOfClass(tClass);
       if (res.swapData) {
-        res.swapData = res.swapData.filter(function(item) { return !getBlockedReason(getDateForDay(targetDate, item.dayB)); });
+        res.swapData = res.swapData.filter(function(item) { return !getBlockedReason(getDateForDay(targetDate, item.dayB), targetGrade); });
+      }
+      var targetBlocked = getBlockedReason(targetDate, targetGrade);
+      if (targetBlocked) {
+        document.getElementById('summaryTargetText').textContent += " · ⚠️ " + targetBlocked;
       }
 
       if (res.swapData && res.swapData.length > 0) {
@@ -3653,7 +3674,7 @@ var dayMap = { 0: "일", 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "�
             • 엑셀에서 <code>3-9</code>가 날짜(3월 9일)로 자동 변환되는 것을 방지하기 위해 텍스트 서식으로 입력하세요. (시스템 내 자동 복원 기능도 내장되어 있습니다.)
           </div>
                   <h3 style="font-size:14px; margin:14px 0 6px;">공휴일·학사일정 제외</h3>
-          <p>공휴일은 2027년 말까지 자동으로 제외됩니다. 시험·체험학습처럼 수업이 없는 날은 시간표 구글 시트에 <strong>학사일정</strong> 탭을 만들어 적습니다.</p>
+          <p>나이스 학사일정의 공휴일·휴업일과 중간·기말고사가 매일 자동으로 반영되며, 한 학년만 해당하는 일정은 그 학년 수업에만 적용됩니다. 체육대회처럼 나이스에 휴업일로 등록되지 않은 날은 시간표 구글 시트의 <strong>학사일정</strong> 탭에 적습니다.</p>
           <table class="help-table">
             <tr><th>시작일</th><th>종료일</th><th>내용</th></tr>
             <tr><td>2026-12-15</td><td>2026-12-18</td><td>2학기 기말고사</td></tr>

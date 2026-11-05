@@ -161,7 +161,7 @@ function parseSheetValues(data) {
 /* =========================================================
    수업이 없는 날 (공휴일·학사일정)
    - 공휴일은 평일만 적고, 2027년 말까지 들어 있다
-   - 학사일정은 setSchoolCalendar로 더한다
+   - 나이스 일정은 학년별로 적용하고, 학교가 직접 적은 일정은 전 학년에 적용한다
    ========================================================= */
 const PUBLIC_HOLIDAYS = {
   "2026-12-25": "성탄절",
@@ -176,9 +176,25 @@ const PUBLIC_HOLIDAYS = {
   "2027-12-27": "성탄절 대체공휴일"
 };
 let schoolCalendarDates = {};
+let neisCalendarDates = {}; // { 날짜: { 학년: 일정 이름 } }
 
-function getBlockedReason(dateStr) {
-  return schoolCalendarDates[dateStr] || PUBLIC_HOLIDAYS[dateStr] || "";
+/* grade를 주면 그 학년 기준, 없으면 전 학년이 수업 없는 날만 알려 준다 */
+function getBlockedReason(dateStr, grade) {
+  const fixed = schoolCalendarDates[dateStr] || PUBLIC_HOLIDAYS[dateStr];
+  if (fixed) return fixed;
+  const byGrade = neisCalendarDates[dateStr];
+  if (!byGrade) return "";
+  if (grade) return byGrade[grade] || "";
+  return (byGrade[1] && byGrade[2] && byGrade[3]) ? byGrade[1] : "";
+}
+
+function gradeOfClass(className) {
+  const m = String(className || "").match(/^(\d)-/);
+  return m ? parseInt(m[1], 10) : 0;
+}
+
+function setNeisCalendar(dates) {
+  neisCalendarDates = dates || {};
 }
 
 function setSchoolCalendar(dates) {
@@ -431,6 +447,7 @@ function getTripLessonsForDates(scheduleList, targetTeacher, dateList) {
     dayLessons.forEach(function(l) {
       const parsed = splitClassName(l.className);
       const pureCls = l.pureClass || parsed.cls || l.className;
+      if (getBlockedReason(dObj.date, gradeOfClass(pureCls))) return;
       const subj = parsed.subj || l.className;
       const cat = deduceSubjectCategory(l.className || subj);
 
@@ -506,6 +523,7 @@ function getTripSwapCandidatesForLesson(scheduleIndex, scheduleList, lesson, tri
 
   const dayNames = ["", "월", "화", "수", "목", "금"];
   const candidateDates = [];
+  const lessonGrade = gradeOfClass(targetClass);
   const now = new Date();
   // 이미 지난 날짜로는 수업을 옮길 수 없다
   const todayStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
@@ -518,7 +536,7 @@ function getTripSwapCandidatesForLesson(scheduleIndex, scheduleList, lesson, tri
     const mm = String(cDate.getMonth() + 1).padStart(2, '0');
     const dd = String(cDate.getDate()).padStart(2, '0');
     const dStr = yyyy + '-' + mm + '-' + dd;
-    if (tripDateStrings.indexOf(dStr) === -1 && dStr >= todayStr && !getBlockedReason(dStr)) {
+    if (tripDateStrings.indexOf(dStr) === -1 && dStr >= todayStr && !getBlockedReason(dStr, lessonGrade)) {
       candidateDates.push({
         date: dStr,
         day: dayNames[d],
@@ -539,7 +557,7 @@ function getTripSwapCandidatesForLesson(scheduleIndex, scheduleList, lesson, tri
       const mm = String(cDate.getMonth() + 1).padStart(2, '0');
       const dd = String(cDate.getDate()).padStart(2, '0');
       const dStr = yyyy + '-' + mm + '-' + dd;
-      if (tripDateStrings.indexOf(dStr) !== -1 || dStr < todayStr || getBlockedReason(dStr)) continue; // 출장일·지난 날짜·수업 없는 날 제외
+      if (tripDateStrings.indexOf(dStr) !== -1 || dStr < todayStr || getBlockedReason(dStr, lessonGrade)) continue; // 출장일·지난 날짜·수업 없는 날 제외
       candidateDates.push({
         date: dStr,
         day: dayNames[d],
@@ -863,5 +881,5 @@ function buildTripWeekComparison(scheduleList, tripLessons, assignments, teacher
 if (typeof module !== "undefined" && module.exports) {
   module.exports = { deduceSubjectCategory, buildTeacherSubjectMap, parseCSV, parseSheetValues, buildScheduleIndex, isTeacherFree, checkConsecutive,
     searchScheduleLocal, findCommonFreeTimeLocal, simulateSwapLocal, simulateSubstituteLocal,
-    getTeacherTimetableLocal, extractClassName, splitClassName, buildGridData, getTripLessonsForDates, analyzeClassContinuity, getTripCandidatesForLesson, autoAssignTripSubstitutes, getTripSwapCandidatesForLesson, buildTripWeekComparison, getBlockedReason, setSchoolCalendar, parseSchoolCalendar };
+    getTeacherTimetableLocal, extractClassName, splitClassName, buildGridData, getTripLessonsForDates, analyzeClassContinuity, getTripCandidatesForLesson, autoAssignTripSubstitutes, getTripSwapCandidatesForLesson, buildTripWeekComparison, getBlockedReason, gradeOfClass, setNeisCalendar, setSchoolCalendar, parseSchoolCalendar };
 }
