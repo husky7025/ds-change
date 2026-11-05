@@ -2403,7 +2403,7 @@ var dayMap = { 0: "일", 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "�
     /* ═══════════════════════════
        HWPX 계획서 파일 생성 및 다운로드 (v2)
     ═══════════════════════════ */
-    var HWPX_TEMPLATE_BASE64 = "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";
+    var HWPX_TEMPLATE_BASE64 = "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";
 
     function xmlEscape(s) {
       return String(s == null ? "" : s)
@@ -2414,30 +2414,57 @@ var dayMap = { 0: "일", 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "�
         .replace(/'/g, "&apos;");
     }
 
-    function makeHwpxP(text, align, bold, sizePt) {
-      var paraId = (align === 'center') ? '13' : (align === 'right' ? '14' : '15');
-      var charId = bold ? '13' : '12';
+    /* HWPX 템플릿 서식 번호 (템플릿 header.xml에 추가한 전용 서식) */
+    var HWPX_PARA = { center: 30, left: 31, right: 32 };
+    var HWPX_CHAR = { body: 27, head: 28, bold: 29, title: 30, note: 31 };
+    var HWPX_BORDER = { thin: 0, thick: 1, dbl: 2 };
+
+    function hwpxBorderId(left, right, top, bottom) {
+      var b = HWPX_BORDER;
+      return 15 + b[left] * 27 + b[right] * 9 + b[top] * 3 + b[bottom];
+    }
+
+    function makeHwpxP(text, paraId, charId) {
       return '<hp:p id="0" paraPrIDRef="' + paraId + '" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0">' +
                '<hp:run charPrIDRef="' + charId + '"><hp:t>' + xmlEscape(text) + '</hp:t></hp:run>' +
              '</hp:p>';
     }
 
-    function makeHwpxCell(col, row, colSpan, rowSpan, widthHwp, text, isHeader, align) {
-      var alignVal = align || (isHeader ? 'center' : 'center');
-      var borderFillId = isHeader ? '3' : '2';
-      var bold = isHeader ? true : false;
-      return '<hp:tc borderFillIDRef="' + borderFillId + '" hasMargin="0">' +
-               '<hp:cellAddr colAddr="' + col + '" rowAddr="' + row + '" />' +
-               '<hp:cellSpan colSpan="' + colSpan + '" rowSpan="' + rowSpan + '" />' +
-               '<hp:cellSz width="' + widthHwp + '" height="1500" />' +
-               '<hp:subList id="" textDirection="HORIZONTAL" lineWrap="BREAK" vertAlign="CENTER">' +
-                 makeHwpxP(text, alignVal, bold, 10) +
+    /* lines: 한 칸에 넣을 문단들 */
+    function makeHwpxCell(o) {
+      var paraId = o.para || HWPX_PARA.center;
+      var charId = o.ch || HWPX_CHAR.body;
+      var lines = (o.lines || [o.text == null ? '' : String(o.text)]).map(function(t) {
+        return makeHwpxP(t, paraId, charId);
+      }).join('');
+      return '<hp:tc name="" header="' + (o.header ? 1 : 0) + '" hasMargin="0" protect="0" editable="0" dirty="0" borderFillIDRef="' + o.border + '">' +
+               '<hp:subList id="" textDirection="HORIZONTAL" lineWrap="BREAK" vertAlign="CENTER" linkListIDRef="0" linkListNextIDRef="0" textWidth="0" textHeight="0" hasTextRef="0" hasNumRef="0">' +
+                 lines +
                '</hp:subList>' +
+               '<hp:cellAddr colAddr="' + o.col + '" rowAddr="' + o.row + '" />' +
+               '<hp:cellSpan colSpan="' + (o.colSpan || 1) + '" rowSpan="' + (o.rowSpan || 1) + '" />' +
+               '<hp:cellSz width="' + o.width + '" height="' + o.height + '" />' +
+               '<hp:cellMargin left="141" right="141" top="141" bottom="141" />' +
              '</hp:tc>';
     }
 
+    function makeHwpxTable(id, treatAsChar, horzAlign, rowCnt, colCnt, width, height, repeatHeader, rowsXml) {
+      return '<hp:tbl id="' + id + '" zOrder="0" numberingType="TABLE" textWrap="TOP_AND_BOTTOM" textFlow="BOTH_SIDES" lock="0" dropcapstyle="None" pageBreak="CELL" repeatHeader="' + repeatHeader + '" rowCnt="' + rowCnt + '" colCnt="' + colCnt + '" cellSpacing="0" borderFillIDRef="2" noAdjust="0">' +
+               '<hp:sz width="' + width + '" widthRelTo="ABSOLUTE" height="' + height + '" heightRelTo="ABSOLUTE" protect="0" />' +
+               '<hp:pos treatAsChar="' + treatAsChar + '" affectLSpacing="0" flowWithText="1" allowOverlap="0" holdAnchorAndSO="0" vertRelTo="PARA" horzRelTo="COLUMN" vertAlign="TOP" horzAlign="' + horzAlign + '" vertOffset="0" horzOffset="0" />' +
+               '<hp:outMargin left="0" right="0" top="0" bottom="0" />' +
+               '<hp:inMargin left="141" right="141" top="141" bottom="141" />' +
+               rowsXml +
+             '</hp:tbl>';
+    }
+
     function buildHwpxSection0Xml(p) {
+      /* 화면·PDF 계획서와 같은 학교 양식 실측값 (19열, 179.5mm) */
       var colWidths = [4215, 1321, 1321, 1321, 2542, 3960, 3960, 4527, 1981, 1981, 1981, 1981, 1981, 1981, 1414, 1414, 4243, 4243, 4527];
+      var ROW_H = { info: 3543, section: 3141, title: 4901, data: 2979, note: 2412 };
+      var LAST_COL = colWidths.length - 1;
+      var tableWidth = colWidths.reduce(function(a, b) { return a + b; }, 0);
+
       function sumW(startCol, count) {
         var s = 0;
         for (var i = startCol; i < startCol + count; i++) s += colWidths[i];
@@ -2460,7 +2487,25 @@ var dayMap = { 0: "일", 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "�
       }];
 
       var totalDataRows = Math.max(7, dataRows.length);
-      var totalRowCnt = 4 + totalDataRows + 1; // 4 헤더행 + 데이터행 + 1 비고행
+      var noteRow = 4 + totalDataRows;
+      var totalRowCnt = noteRow + 1;
+
+      /* 칸 위치로 양식의 굵은 테두리와 이중선을 정한다 */
+      function mainCell(col, row, colSpan, rowSpan, text, height, opts) {
+        opts = opts || {};
+        var endCol = col + colSpan - 1;
+        var endRow = row + rowSpan - 1;
+        var inBody = row >= 2 && row < noteRow;
+        var left = col === 0 ? 'thick' : ((inBody && (col === 8 || col === 10)) ? 'dbl' : 'thin');
+        var right = endCol === LAST_COL ? 'thick' : ((inBody && (endCol === 7 || endCol === 9)) ? 'dbl' : 'thin');
+        var top = row === 0 ? 'thick' : (row === 2 ? 'dbl' : 'thin');
+        var bottom = endRow === noteRow ? 'thick' : (endRow === 1 ? 'dbl' : 'thin');
+        return makeHwpxCell({
+          col: col, row: row, colSpan: colSpan, rowSpan: rowSpan, width: sumW(col, colSpan), height: height,
+          text: text, ch: opts.ch, para: opts.para, header: row < 4,
+          border: hwpxBorderId(left, right, top, bottom)
+        });
+      }
 
       var xml = '<?xml version="1.0" encoding="utf-8"?>\n' +
         '<hs:sec xmlns:ha="http://www.hancom.co.kr/hwpml/2011/app" xmlns:hp="http://www.hancom.co.kr/hwpml/2011/paragraph" xmlns:hp10="http://www.hancom.co.kr/hwpml/2016/paragraph" xmlns:hs="http://www.hancom.co.kr/hwpml/2011/section" xmlns:hc="http://www.hancom.co.kr/hwpml/2011/core" xmlns:hh="http://www.hancom.co.kr/hwpml/2011/head">\n' +
@@ -2472,139 +2517,103 @@ var dayMap = { 0: "일", 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "�
         '        <hp:visibility hideHeader="0" hideFooter="0" hideMasterPage="0" border="SHOW_ALL" fill="SHOW_ALL" hidePageNum="0" />\n' +
         '        <hp:lineNumber restartType="NEW_PAGE" countBy="1" distance="1134" startNumber="1" />\n' +
         '        <hp:pagePr width="59528" height="84188" autoSpaceEAsianEng="0" autoSpaceEAsianNum="0">\n' +
-        '          <hp:margin left="4252" right="4252" top="2834" bottom="2834" header="0" footer="0" gutter="0" />\n' +
+        '          <hp:margin left="4252" right="4252" top="4252" bottom="2834" header="0" footer="0" gutter="0" />\n' +
         '        </hp:pagePr>\n' +
         '      </hp:secPr>\n' +
         '    </hp:run>\n' +
         '  </hp:p>\n';
 
-      // 1. 제목
-      xml += '  <hp:p id="1" paraPrIDRef="2" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0">\n';
-      xml += '    <hp:run charPrIDRef="1"><hp:t>수업(교체ㆍ보강) 계획서</hp:t></hp:run>\n';
-      xml += '  </hp:p>\n';
+      // 1. 결재란
+      var approvalBorder = hwpxBorderId('thin', 'thin', 'thin', 'thin');
+      var approvalRows =
+        '<hp:tr>' +
+          makeHwpxCell({ col: 0, row: 0, rowSpan: 2, width: 2512, height: 6083, lines: ['결', '재'], ch: HWPX_CHAR.head, border: approvalBorder }) +
+          makeHwpxCell({ col: 1, row: 0, width: 4904, height: 1766, text: '교무부장', border: approvalBorder }) +
+          makeHwpxCell({ col: 2, row: 0, width: 4717, height: 1766, text: '교 감', border: approvalBorder }) +
+        '</hp:tr><hp:tr>' +
+          makeHwpxCell({ col: 1, row: 1, width: 4904, height: 4317, text: '', border: approvalBorder }) +
+          makeHwpxCell({ col: 2, row: 1, width: 4717, height: 4317, text: '', border: approvalBorder }) +
+        '</hp:tr>';
+      xml += '  <hp:p id="1" paraPrIDRef="' + HWPX_PARA.right + '" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0">' +
+             '<hp:run charPrIDRef="' + HWPX_CHAR.body + '">' +
+             makeHwpxTable(101, 1, 'RIGHT', 2, 3, 12133, 6083, 0, approvalRows) +
+             '</hp:run></hp:p>\n';
 
-      xml += '  <hp:p id="2" paraPrIDRef="0" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0">\n';
-      xml += '    <hp:run charPrIDRef="0">\n';
-      xml += '      <hp:tbl id="101" zOrder="0" numberingType="TABLE" textWrap="TOP_AND_BOTTOM" textFlow="BOTH_SIDES" lock="0" dropcapstyle="None" pageBreak="CELL" repeatHeader="0" rowCnt="2" colCnt="3" cellSpacing="0" borderFillIDRef="2" noAdjust="0">\n';
-      xml += '        <hp:sz width="12132" widthRelTo="ABSOLUTE" height="4970" heightRelTo="ABSOLUTE" protect="0" />\n';
-      xml += '        <hp:pos treatAsChar="1" affectLSpacing="0" flowWithText="1" allowOverlap="0" holdAnchorAndSO="0" vertRelTo="PARA" horzRelTo="COLUMN" vertAlign="TOP" horzAlign="RIGHT" vertOffset="0" horzOffset="0" />\n';
-      xml += '        <hp:tr>\n';
-      xml += makeHwpxCell(0, 0, 1, 1, 4044, '교무', true);
-      xml += makeHwpxCell(1, 0, 1, 1, 4044, '교감', true);
-      xml += makeHwpxCell(2, 0, 1, 1, 4044, '교장', true);
-      xml += '        </hp:tr>\n';
-      xml += '        <hp:tr>\n';
-      xml += makeHwpxCell(0, 1, 1, 1, 4044, '', false);
-      xml += makeHwpxCell(1, 1, 1, 1, 4044, '', false);
-      xml += makeHwpxCell(2, 1, 1, 1, 4044, '', false);
-      xml += '        </hp:tr>\n';
-      xml += '      </hp:tbl>\n';
-      xml += '    </hp:run>\n';
-      xml += '  </hp:p>\n';
+      // 2. 제목
+      xml += '  <hp:p id="2" paraPrIDRef="' + HWPX_PARA.center + '" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0">' +
+             '<hp:run charPrIDRef="' + HWPX_CHAR.title + '"><hp:t> </hp:t></hp:run></hp:p>\n';
+      xml += '  <hp:p id="3" paraPrIDRef="' + HWPX_PARA.center + '" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0">' +
+             '<hp:run charPrIDRef="' + HWPX_CHAR.title + '"><hp:t>수  업 ( 교체ㆍ보강 )  계  획  서</hp:t></hp:run></hp:p>\n';
+      xml += '  <hp:p id="4" paraPrIDRef="' + HWPX_PARA.center + '" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0">' +
+             '<hp:run charPrIDRef="' + HWPX_CHAR.body + '"><hp:t> </hp:t></hp:run></hp:p>\n';
 
-      // 2. 본문 대장 표
-      xml += '  <hp:p id="3" paraPrIDRef="15" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0">\n';
-      xml += '    <hp:run charPrIDRef="0">\n';
-      xml += '      <hp:tbl id="102" zOrder="0" numberingType="TABLE" textWrap="TOP_AND_BOTTOM" textFlow="BOTH_SIDES" lock="0" dropcapstyle="None" pageBreak="CELL" repeatHeader="1" rowCnt="' + totalRowCnt + '" colCnt="19" cellSpacing="0" borderFillIDRef="2" noAdjust="0">\n';
-      xml += '        <hp:sz width="50880" widthRelTo="ABSOLUTE" height="35000" heightRelTo="ABSOLUTE" protect="0" />\n';
-      xml += '        <hp:pos treatAsChar="1" affectLSpacing="0" flowWithText="1" allowOverlap="0" holdAnchorAndSO="0" vertRelTo="PARA" horzRelTo="COLUMN" vertAlign="TOP" horzAlign="CENTER" vertOffset="0" horzOffset="0" />\n';
+      // 3. 본문 표
+      var head = { ch: HWPX_CHAR.head };
+      var bold = { ch: HWPX_CHAR.bold };
+      var rows = '';
 
-      // 1행: 교과 / 과목 / 담당교사
-      xml += '        <hp:tr>\n';
-      xml += makeHwpxCell(0, 0, 2, 1, sumW(0, 2), '교 과', true);
-      xml += makeHwpxCell(2, 0, 4, 1, sumW(2, 4), p.category || '', false);
-      xml += makeHwpxCell(6, 0, 3, 1, sumW(6, 3), '과 목', true);
-      xml += makeHwpxCell(9, 0, 4, 1, sumW(9, 4), p.subjectA || '', false);
-      xml += makeHwpxCell(13, 0, 4, 1, sumW(13, 4), '담당 교사', true);
-      xml += makeHwpxCell(17, 0, 2, 1, sumW(17, 2), p.teacherA || '', false);
-      xml += '        </hp:tr>\n';
+      rows += '<hp:tr>';
+      rows += mainCell(0, 0, 2, 1, '교 과', ROW_H.info, head);
+      rows += mainCell(2, 0, 4, 1, p.category || '', ROW_H.info);
+      rows += mainCell(6, 0, 3, 1, '과 목', ROW_H.info, head);
+      rows += mainCell(9, 0, 4, 1, p.subjectA || '', ROW_H.info);
+      rows += mainCell(13, 0, 4, 1, '담당 교사', ROW_H.info, head);
+      rows += mainCell(17, 0, 2, 1, p.teacherA || '', ROW_H.info);
+      rows += '</hp:tr>';
 
-      // 2행: 결강사유 / 일시
-      xml += '        <hp:tr>\n';
-      xml += makeHwpxCell(0, 1, 3, 1, sumW(0, 3), '결강 사유', true);
-      xml += makeHwpxCell(3, 1, 8, 1, sumW(3, 8), p.reason || '', false);
-      xml += makeHwpxCell(11, 1, 4, 1, sumW(11, 4), '일 시', true);
-      xml += makeHwpxCell(15, 1, 4, 1, sumW(15, 4), p.shortDateA || '', false);
-      xml += '        </hp:tr>\n';
+      rows += '<hp:tr>';
+      rows += mainCell(0, 1, 3, 1, '결강 사유', ROW_H.info, head);
+      rows += mainCell(3, 1, 8, 1, p.reason || '', ROW_H.info);
+      rows += mainCell(11, 1, 4, 1, '일 시', ROW_H.info, head);
+      rows += mainCell(15, 1, 4, 1, p.shortDateA || '', ROW_H.info);
+      rows += '</hp:tr>';
 
-      // 3행: 대분류 헤더
-      xml += '        <hp:tr>\n';
-      xml += makeHwpxCell(0, 2, 8, 1, sumW(0, 8), '결 강 내 용', true);
-      xml += makeHwpxCell(8, 2, 2, 1, sumW(8, 2), '구 분', true);
-      xml += makeHwpxCell(10, 2, 9, 1, sumW(10, 9), '보 강 및 교 체 내 용', true);
-      xml += '        </hp:tr>\n';
+      rows += '<hp:tr>';
+      rows += mainCell(0, 2, 8, 1, '변경 전', ROW_H.section, bold);
+      rows += mainCell(8, 2, 2, 2, '구분', ROW_H.section + ROW_H.title, bold);
+      rows += mainCell(10, 2, 9, 1, '변경 후', ROW_H.section, bold);
+      rows += '</hp:tr>';
 
-      // 4행: 세부 헤더
-      xml += '        <hp:tr>\n';
-      xml += makeHwpxCell(0, 3, 1, 1, colWidths[0], '일시', true);
-      xml += makeHwpxCell(1, 3, 3, 1, sumW(1, 3), '학급', true);
-      xml += makeHwpxCell(4, 3, 1, 1, colWidths[4], '교시', true);
-      xml += makeHwpxCell(5, 3, 2, 1, sumW(5, 2), '과목', true);
-      xml += makeHwpxCell(7, 3, 1, 1, colWidths[7], '교사', true);
-      xml += makeHwpxCell(8, 3, 2, 1, sumW(8, 2), '구분', true);
-      xml += makeHwpxCell(10, 3, 2, 1, sumW(10, 2), '일시', true);
-      xml += makeHwpxCell(12, 3, 2, 1, sumW(12, 2), '학급', true);
-      xml += makeHwpxCell(14, 3, 2, 1, sumW(14, 2), '교시', true);
-      xml += makeHwpxCell(16, 3, 2, 1, sumW(16, 2), '과목', true);
-      xml += makeHwpxCell(18, 3, 1, 1, colWidths[18], '교사', true);
-      xml += '        </hp:tr>\n';
+      rows += '<hp:tr>';
+      [[0, 1, '일자'], [1, 3, '학반'], [4, 1, '교시'], [5, 2, '과목'], [7, 1, '교사명'],
+       [10, 2, '일자'], [12, 2, '학년반'], [14, 2, '교시'], [16, 2, '과목'], [18, 1, '교사명']].forEach(function(c) {
+        rows += mainCell(c[0], 3, c[1], 1, c[2], ROW_H.title);
+      });
+      rows += '</hp:tr>';
 
-      // 5행 ~ 데이터 행들
       for (var i = 0; i < totalDataRows; i++) {
         var r = 4 + i;
-        xml += '        <hp:tr>\n';
-        if (i < dataRows.length) {
-          var item = dataRows[i];
-          var itemSwap = (item.isSwap || item.typeLabel === '교체' || item.typeLabel === '수업교체');
-          xml += makeHwpxCell(0, r, 1, 1, colWidths[0], item.shortDateA || '', false);
-          xml += makeHwpxCell(1, r, 3, 1, sumW(1, 3), item.cls || '', false);
-          xml += makeHwpxCell(4, r, 1, 1, colWidths[4], item.periodA ? String(item.periodA) : '', false);
-          xml += makeHwpxCell(5, r, 2, 1, sumW(5, 2), item.subjectA || '', false);
-          xml += makeHwpxCell(7, r, 1, 1, colWidths[7], item.teacherA || p.teacherA || '', false);
-          xml += makeHwpxCell(8, r, 2, 1, sumW(8, 2), item.typeLabel || (itemSwap ? '교체' : '보강'), true);
-          if (itemSwap) {
-            xml += makeHwpxCell(10, r, 2, 1, sumW(10, 2), item.shortDateB || item.shortDateA || '', false);
-            xml += makeHwpxCell(12, r, 2, 1, sumW(12, 2), item.clsB || item.cls || '', false);
-            xml += makeHwpxCell(14, r, 2, 1, sumW(14, 2), item.periodB ? String(item.periodB) : '', false);
-            xml += makeHwpxCell(16, r, 2, 1, sumW(16, 2), item.subjectB || '', false);
-            xml += makeHwpxCell(18, r, 1, 1, colWidths[18], item.teacherB || '', false);
-          } else {
-            xml += makeHwpxCell(10, r, 2, 1, sumW(10, 2), item.shortDateB || item.shortDateA || '', false);
-            xml += makeHwpxCell(12, r, 2, 1, sumW(12, 2), item.clsB || item.cls || '', false);
-            xml += makeHwpxCell(14, r, 2, 1, sumW(14, 2), item.periodB ? String(item.periodB) : (item.periodA ? String(item.periodA) : ''), false);
-            xml += makeHwpxCell(16, r, 2, 1, sumW(16, 2), item.subjectB || item.subjectA || '', false);
-            xml += makeHwpxCell(18, r, 1, 1, colWidths[18], item.teacherB || '', false);
-          }
-        } else {
-          xml += makeHwpxCell(0, r, 1, 1, colWidths[0], '', false);
-          xml += makeHwpxCell(1, r, 3, 1, sumW(1, 3), '', false);
-          xml += makeHwpxCell(4, r, 1, 1, colWidths[4], '', false);
-          xml += makeHwpxCell(5, r, 2, 1, sumW(5, 2), '', false);
-          xml += makeHwpxCell(7, r, 1, 1, colWidths[7], '', false);
-          xml += makeHwpxCell(8, r, 2, 1, sumW(8, 2), '', false);
-          xml += makeHwpxCell(10, r, 2, 1, sumW(10, 2), '', false);
-          xml += makeHwpxCell(12, r, 2, 1, sumW(12, 2), '', false);
-          xml += makeHwpxCell(14, r, 2, 1, sumW(14, 2), '', false);
-          xml += makeHwpxCell(16, r, 2, 1, sumW(16, 2), '', false);
-          xml += makeHwpxCell(18, r, 1, 1, colWidths[18], '', false);
-        }
-        xml += '        </hp:tr>\n';
+        var item = i < dataRows.length ? dataRows[i] : null;
+        var itemSwap = item && (item.isSwap || item.typeLabel === '교체' || item.typeLabel === '수업교체');
+        var values = item ? [
+          item.shortDateA || '', item.cls || '', item.periodA ? String(item.periodA) : '',
+          item.subjectA || '', item.teacherA || p.teacherA || '',
+          item.typeLabel || (itemSwap ? '교체' : '보강'),
+          item.shortDateB || item.shortDateA || '', item.clsB || item.cls || '',
+          item.periodB ? String(item.periodB) : (item.periodA ? String(item.periodA) : ''),
+          item.subjectB || item.subjectA || '', item.teacherB || ''
+        ] : ['', '', '', '', '', '', '', '', '', '', ''];
+        var cols = [[0, 1], [1, 3], [4, 1], [5, 2], [7, 1], [8, 2], [10, 2], [12, 2], [14, 2], [16, 2], [18, 1]];
+        rows += '<hp:tr>';
+        cols.forEach(function(c, idx) {
+          rows += mainCell(c[0], r, c[1], 1, values[idx], ROW_H.data);
+        });
+        rows += '</hp:tr>';
       }
 
-      // 비고란 (마지막 행)
-      var remarkRow = 4 + totalDataRows;
-      xml += '        <hp:tr>\n';
-      xml += makeHwpxCell(0, remarkRow, 19, 1, 50880, '보강 및 대체 보강시 수업자료 : 유인물, 활동지, 교과서 속 형성평가 등..', false, 'left');
-      xml += '        </hp:tr>\n';
+      rows += '<hp:tr>';
+      rows += mainCell(0, noteRow, 19, 1, ' 보강 및 대체 보강시 수업자료 : 유인물, 활동지, 교과서 속 형성평가 등..', ROW_H.note, { para: HWPX_PARA.left });
+      rows += '</hp:tr>';
 
-      xml += '      </hp:tbl>\n';
-      xml += '    </hp:run>\n';
-      xml += '  </hp:p>\n';
+      var tableHeight = ROW_H.info * 2 + ROW_H.section + ROW_H.title + ROW_H.data * totalDataRows + ROW_H.note;
+      xml += '  <hp:p id="5" paraPrIDRef="' + HWPX_PARA.center + '" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0">' +
+             '<hp:run charPrIDRef="' + HWPX_CHAR.body + '">' +
+             makeHwpxTable(102, 0, 'CENTER', totalRowCnt, colWidths.length, tableWidth, tableHeight, 1, rows) +
+             '</hp:run></hp:p>\n';
 
       // 4. 하단 각주
-      xml += '  <hp:p id="5" paraPrIDRef="15" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0">\n';
-      xml += '    <hp:run charPrIDRef="12"><hp:t>※ 결강 기간과 보강, 교체내역에 따라 표를 적절히 편집하여 사용가능.</hp:t></hp:run>\n';
-      xml += '  </hp:p>\n';
+      xml += '  <hp:p id="6" paraPrIDRef="' + HWPX_PARA.left + '" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0">' +
+             '<hp:run charPrIDRef="' + HWPX_CHAR.note + '"><hp:t>※ 결강 기간과 보강, 교체내역에 따라 표를 적절히 편집하여 사용가능.</hp:t></hp:run></hp:p>\n';
       xml += '</hs:sec>';
 
       return xml;
